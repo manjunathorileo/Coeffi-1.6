@@ -1,0 +1,15 @@
+package com.dfq.coeffi.employeePerformanceManagement.entity;
+
+public enum GoalStatusEnum {
+    YET_TO_SUBMIT_GOAL,
+    GOAL_COMPLETED,
+    GOAL_FORWARDED,
+    GOAL_APPROVED,
+    GOAL_REJECTED,
+    SELF_APPRAISAL_PENDING,
+    SELF_APPRAISAL_FORWARDED,
+    SELF_APPRAISAL_COMPLETED,
+    MANAGER_REVIEW_PENDING,
+    MANAGER_REVIEW_COMPLETED,
+    HR_CONSOLIDATION,
+}
