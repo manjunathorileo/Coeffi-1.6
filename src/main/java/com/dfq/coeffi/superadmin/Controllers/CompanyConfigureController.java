@@ -1183,6 +1183,22 @@ public class  CompanyConfigureController extends BaseController {
         return new ResponseEntity<>(configure, HttpStatus.OK);
     }
 
+    @PostMapping("company-config/employee-releave/{id}/{status}")
+    public ResponseEntity<CompanyConfigure> employeeReleaveWithExit(@PathVariable("id") long id, @PathVariable("status") boolean status) {
+        CompanyConfigure configure = companyConfigureService.getCompanyById(id);
+        configure.setReleaveWithExitProcess(status);
+        companyConfigureService.saveCompany(configure);
+        return new ResponseEntity<>(configure, HttpStatus.OK);
+    }
+
+    @PostMapping("company-config/attendance-with-headcount/{id}/{status}")
+    public ResponseEntity<CompanyConfigure> employeeAttendanceWithHeadcount(@PathVariable("id") long id, @PathVariable("status") boolean status) {
+        CompanyConfigure configure = companyConfigureService.getCompanyById(id);
+        configure.setAttendanceWithHeadCount(status);
+        companyConfigureService.saveCompany(configure);
+        return new ResponseEntity<>(configure, HttpStatus.OK);
+    }
+
 
 
 }

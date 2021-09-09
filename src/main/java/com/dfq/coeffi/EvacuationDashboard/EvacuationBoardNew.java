@@ -935,12 +935,13 @@ public class EvacuationBoardNew extends BaseController {
                             System.out.println("Im  here 333333333");
                             evacuationDto.setCompanyName(companyName);
                         }
+                        if (empPermanentContract.getContractCompany().equalsIgnoreCase("")){
+                            System.out.println("Im  here 44444444");
+                            evacuationDto.setCompanyName(companyName);
+                        }
                     }
 
-                    if (empPermanentContract.getContractCompany().equalsIgnoreCase("")){
-                        System.out.println("Im  here 44444444");
-                        evacuationDto.setCompanyName(companyName);
-                    }
+
                 }
                 VisitorPass visitorPass = visitorPassService.getByMobileNumber(insideCsvRaw.getSsoId());
                 if (visitorPass != null) {

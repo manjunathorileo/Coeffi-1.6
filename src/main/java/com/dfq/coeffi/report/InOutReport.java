@@ -63,6 +63,11 @@ public class InOutReport extends BaseController {
 
     @PostMapping("report/in-out")
     public ResponseEntity<List<EmployeeAttendance>> form22(@RequestBody DateDto dateDto, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        if(dateDto.getReportType().equalsIgnoreCase("monthly")){
+            dateDto.setStartDate(DateUtil.startDateOfMonthAndYear(dateDto.getYear(),dateDto.getMonth()));
+            dateDto.setEndDate(DateUtil.endDateOfMonthAndYear(dateDto.getYear(),dateDto.getMonth()));
+        }
         List<MonthlyEmployeeAttendanceDto> monthlyEmployeeAttendanceDtos = employeeAttendanceController.viewMonthlyEmployeeAttendance(dateDto);
         OutputStream out = null;
         String fileName = "Monthly_Late_Entry_Report_" + DateUtil.getMonthName(dateDto.getStartDate());

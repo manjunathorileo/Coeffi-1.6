@@ -19,5 +19,7 @@ public class EmployeeLoginDto {
 	private Date fromDate;
 	private Date toDate;
 
+	private List<Long> roleIds;
+
 	private List<Long> documentIds;
 }

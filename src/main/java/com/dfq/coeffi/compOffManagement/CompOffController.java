@@ -160,6 +160,7 @@ public class CompOffController extends BaseController {
 
             compOffTracker.setGeneratedDates(genDates);
             compOffTracker.setEmployeeId(compOff.getEmployeeId());
+            compOffTracker.setEmployeeCode(compOff.getEmployeeCode());
             compOffTracker.setMonth(month);
             compOffTracker.setYear(year);
             compOffTracker.setBalance(compOffTracker.getCompOffGeneratedDays() - compOffTracker.getCompOffAvailedDays());
@@ -199,9 +200,9 @@ public class CompOffController extends BaseController {
             compOff.setEmployeeId(employeeId);
             if (employee.get().getFirstApprovalManager() != null) {
                 compOff.setFirstMgrId(employee.get().getFirstApprovalManager().getId());
-            } else {
+            } /*else {
                 throw new EntityNotFoundException("Please assign reporting manager for this employee");
-            }
+            }*/
 
             if (employee.get().getSecondApprovalManager() != null) {
                 compOff.setSecondMgrId(employee.get().getSecondApprovalManager().getId());
@@ -248,6 +249,9 @@ public class CompOffController extends BaseController {
                 genDates.add(datesForCompOff);
 
                 compOffTracker.setGeneratedDates(genDates);
+
+
+                compOffTracker.setEmployeeCode(employee.get().getEmployeeCode());
                 compOffTracker.setEmployeeId(compOff.getEmployeeId());
                 compOffTracker.setMonth(month);
                 compOffTracker.setYear(year);
@@ -275,9 +279,9 @@ public class CompOffController extends BaseController {
 
             if (employee.get().getFirstApprovalManager() != null) {
                 leave.setFirstApprovalManager(employee.get().getFirstApprovalManager());
-            } else {
+            } /*else {
                 throw new EntityNotFoundException("Please assign reporting manager for this employee");
-            }
+            }*/
 
             if (employee.get().getSecondApprovalManager() != null) {
                 leave.setSecondApprovalManager(employee.get().getSecondApprovalManager());

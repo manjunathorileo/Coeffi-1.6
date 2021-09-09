@@ -246,6 +246,7 @@ public class LeaveController extends BaseController {
 
                 //----------------------------------------------------
                 leave.setFirstName(employee.get().getFirstName() + " " + employee.get().getLastName());
+                leave.setEmployeeCode(employee.get().getEmployeeCode());
                 leave.setRefName("EMPLOYEE");
                 checkDuplicates(leave);
                 //-----------log-----------------------
@@ -287,6 +288,7 @@ public class LeaveController extends BaseController {
 
             //----------------------------------------------------
             leave.setFirstName(employee.get().getFirstName() + " " + employee.get().getLastName());
+            leave.setEmployeeCode(employee.get().getEmployeeCode());
             leave.setRefName("EMPLOYEE");
             checkDuplicates(leave);
             //-----------log-----------------------

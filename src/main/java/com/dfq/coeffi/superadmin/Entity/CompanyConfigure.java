@@ -396,6 +396,10 @@ public class CompanyConfigure {
     private String productNameHeader;
     private long fileLimit;
     private long testCount;
+
+    private boolean releaveWithExitProcess;
+    private boolean attendanceWithHeadCount;
+
     //-------Gate assignment---
 //    private EmployeeType gateAssignEmployeeType;
 //    @ManyToMany

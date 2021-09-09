@@ -388,60 +388,65 @@ public class EmployeeController extends BaseController {
         List<Employee> employeeData = employeeService.findAll();
         List<Employee> employeeList = new ArrayList<>();
         for (Employee e : employeeData) {
-            Employee emp = new Employee();
-            emp.setId(e.getId());
-            emp.setFirstName(e.getFirstName());
-            emp.setLastName(e.getLastName());
-            emp.setEmployeeCode(e.getEmployeeCode());
-            emp.setEmployeeAddress(e.getEmployeeAddress());
-            emp.setFatherName(e.getFatherName());
-            emp.setMotherName(e.getMotherName());
-            emp.setGender(e.getGender());
-            emp.setMaritalStatus(e.getMaritalStatus());
-            emp.setDateOfMarriage(e.getDateOfMarriage());
-            emp.setDateOfBirth(e.getDateOfBirth());
-            emp.setAge(e.getAge());
-            emp.setPhoneNumber(e.getPhoneNumber());
-            emp.setEmergencyPhoneNumber(e.getEmergencyPhoneNumber());
-            emp.setBloodGroup(e.getBloodGroup());
-            emp.setReligion(e.getReligion());
-            emp.setCaste(e.getCaste());
-            emp.setAdharNumber(e.getAdharNumber());
-            emp.setFamilyDependents(e.getFamilyDependents());
-            emp.setCurrentAddress(e.getCurrentAddress());
-            emp.setPermanentAddress(e.getPermanentAddress());
-            emp.setDateOfJoining(e.getDateOfJoining());
-            emp.setProbationaryPeriod(e.getProbationaryPeriod());
-            emp.setPfNumber(e.getPfNumber());
-            emp.setUanNumber(e.getUanNumber());
-            emp.setPanNumber(e.getPanNumber());
-            emp.setEsiNumber(e.getEsiNumber());
-            emp.setLevel(e.getLevel());
-            emp.setWifeName(e.getWifeName());
-            emp.setOfferedSalary(e.getOfferedSalary());
-            emp.setFamilyMember(e.getFamilyMember());
-            emp.setQualification(e.getQualification());
-            emp.setPreviousEmployement(e.getPreviousEmployement());
-            emp.setEmployeeCertifications(e.getEmployeeCertifications());
-            emp.setEmployeeType(e.getEmployeeType());
-            emp.setDepartment(e.getDepartment());
-            emp.setDesignation(e.getDesignation());
-            emp.setDepartmentTrackerList(e.getDepartmentTrackerList());
-            emp.setOtRequired(e.isOtRequired());
-            emp.setDesignationStartDate(e.getDesignationStartDate());
-            emp.setDesignationEndDate(e.getDesignationEndDate());
-            emp.setFirstWeekOff(e.getFirstWeekOff());
-            emp.setSecondWeekOff(e.getSecondWeekOff());
-            emp.setFirstWeekOffName(e.getFirstWeekOffName());
-            emp.setSecondWeekOffName(e.getSecondWeekOffName());
-            emp.setRfid(e.getRfid());
-            emp.setReleaved(e.isReleaved());
-            if (e.getDepartmentName() != null) {
-                Department department = new Department();
-                department.setName(e.getDepartmentName());
-                emp.setDepartment(department);
+            if(e.getEmployeeType().equals(EmployeeType.PERMANENT) ||
+                    e.getEmployeeType().equals(EmployeeType.PERMANENT_WORKER)||
+                    e.getEmployeeType().equals(EmployeeType.CONTRACT)||
+                    e.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)) {
+                Employee emp = new Employee();
+                emp.setId(e.getId());
+                emp.setFirstName(e.getFirstName());
+                emp.setLastName(e.getLastName());
+                emp.setEmployeeCode(e.getEmployeeCode());
+                emp.setEmployeeAddress(e.getEmployeeAddress());
+                emp.setFatherName(e.getFatherName());
+                emp.setMotherName(e.getMotherName());
+                emp.setGender(e.getGender());
+                emp.setMaritalStatus(e.getMaritalStatus());
+                emp.setDateOfMarriage(e.getDateOfMarriage());
+                emp.setDateOfBirth(e.getDateOfBirth());
+                emp.setAge(e.getAge());
+                emp.setPhoneNumber(e.getPhoneNumber());
+                emp.setEmergencyPhoneNumber(e.getEmergencyPhoneNumber());
+                emp.setBloodGroup(e.getBloodGroup());
+                emp.setReligion(e.getReligion());
+                emp.setCaste(e.getCaste());
+                emp.setAdharNumber(e.getAdharNumber());
+                emp.setFamilyDependents(e.getFamilyDependents());
+                emp.setCurrentAddress(e.getCurrentAddress());
+                emp.setPermanentAddress(e.getPermanentAddress());
+                emp.setDateOfJoining(e.getDateOfJoining());
+                emp.setProbationaryPeriod(e.getProbationaryPeriod());
+                emp.setPfNumber(e.getPfNumber());
+                emp.setUanNumber(e.getUanNumber());
+                emp.setPanNumber(e.getPanNumber());
+                emp.setEsiNumber(e.getEsiNumber());
+                emp.setLevel(e.getLevel());
+                emp.setWifeName(e.getWifeName());
+                emp.setOfferedSalary(e.getOfferedSalary());
+                emp.setFamilyMember(e.getFamilyMember());
+                emp.setQualification(e.getQualification());
+                emp.setPreviousEmployement(e.getPreviousEmployement());
+                emp.setEmployeeCertifications(e.getEmployeeCertifications());
+                emp.setEmployeeType(e.getEmployeeType());
+                emp.setDepartment(e.getDepartment());
+                emp.setDesignation(e.getDesignation());
+                emp.setDepartmentTrackerList(e.getDepartmentTrackerList());
+                emp.setOtRequired(e.isOtRequired());
+                emp.setDesignationStartDate(e.getDesignationStartDate());
+                emp.setDesignationEndDate(e.getDesignationEndDate());
+                emp.setFirstWeekOff(e.getFirstWeekOff());
+                emp.setSecondWeekOff(e.getSecondWeekOff());
+                emp.setFirstWeekOffName(e.getFirstWeekOffName());
+                emp.setSecondWeekOffName(e.getSecondWeekOffName());
+                emp.setRfid(e.getRfid());
+                emp.setReleaved(e.isReleaved());
+                if (e.getDepartmentName() != null) {
+                    Department department = new Department();
+                    department.setName(e.getDepartmentName());
+                    emp.setDepartment(department);
+                }
+                employeeList.add(emp);
             }
-            employeeList.add(emp);
         }
         if (CollectionUtils.isEmpty(employeeData)) {
             throw new EntityNotFoundException("employeeData");
