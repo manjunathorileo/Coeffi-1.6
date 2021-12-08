@@ -43,4 +43,9 @@ public class DesignationServiceImpl implements DesignationService {
     public List<Designation> getDepartmentDetail(Department department) {
         return designationRepository.findByDepartment(department);
     }
+
+    @Override
+    public Designation getByName(String role) {
+        return designationRepository.findByName(role);
+    }
 }

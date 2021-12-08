@@ -26,6 +26,7 @@ public class FoodTimeMaster {
     private Date timeTo;
     @CreationTimestamp
     private Date createdOn;
+    private String shiftName;
 
 
 }

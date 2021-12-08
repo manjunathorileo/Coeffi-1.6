@@ -209,11 +209,12 @@ public class ImportEmployeeMaster extends BaseController {
                             employee.setFirstName(row.getCell(1).getStringCellValue());
                             employee.setLastName("");
                             employee.setCardId( String.valueOf((long)row.getCell(2).getNumericCellValue()));
+                            employee.setDepartmentName(row.getCell(3).getStringCellValue());
                             EmployeeType type = EmployeeType.PERMANENT_CONTRACT;
                             employee.setEmployeeType(type);
                             employee.setContractCompany(row.getCell(5).getStringCellValue());
                             employee.setLocation("");
-                            employee.setDepartmentName(row.getCell(3).getStringCellValue());
+
 
                             permanentContractService.save(employee);
                             dto.add(employee);

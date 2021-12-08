@@ -14,6 +14,7 @@ import com.dfq.coeffi.employeePermanentContract.repositories.PermanentContractRe
 import com.dfq.coeffi.employeePermanentContract.services.ContractCompanyService;
 import com.dfq.coeffi.employeePermanentContract.services.PermanentContractService;
 import com.dfq.coeffi.entity.hr.Department;
+import com.dfq.coeffi.entity.hr.Designation;
 import com.dfq.coeffi.entity.hr.employee.AttendanceStatus;
 import com.dfq.coeffi.entity.hr.employee.Employee;
 import com.dfq.coeffi.entity.hr.employee.EmployeeType;
@@ -21,6 +22,7 @@ import com.dfq.coeffi.entity.payroll.EmployeeAttendance;
 import com.dfq.coeffi.policy.document.Document;
 import com.dfq.coeffi.policy.document.FileStorageService;
 import com.dfq.coeffi.service.hr.DepartmentService;
+import com.dfq.coeffi.service.hr.DesignationService;
 import com.dfq.coeffi.service.hr.EmployeeService;
 import com.dfq.coeffi.service.payroll.EmployeeAttendanceService;
 import com.dfq.coeffi.util.DateUtil;
@@ -72,16 +74,18 @@ public class PermanentContractController extends BaseController {
     DepartmentService departmentService;
     @Autowired
     FileStorageService fileStorageService;
+    @Autowired
+    DesignationService designationService;
 
     @PostMapping("permanentContract")
     public ResponseEntity<EmpPermanentContract> save(@RequestBody EmpPermanentContract empPermanentContract) {
         empPermanentContract.setStatus(true);
         empPermanentContract.setBelongsTo(true);
-        if(empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)){
+        if (empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)) {
             empPermanentContract.setEmployeeType(EmployeeType.CONTRACT);
             empPermanentContract.setTemporaryContract(false);
         }
-        if(empPermanentContract.getEmployeeType().equals(EmployeeType.CONTRACT)){
+        if (empPermanentContract.getEmployeeType().equals(EmployeeType.CONTRACT)) {
             empPermanentContract.setEmployeeType(EmployeeType.CONTRACT);
             empPermanentContract.setTemporaryContract(true);
         }
@@ -140,7 +144,7 @@ public class PermanentContractController extends BaseController {
                         permanentContract.setStartDate(employeePass.getStartDate());
                         permanentContract.setEndDate(employeePass.getEndDate());
                         permanentContractService.save(permanentContract);
-                        if (permanentContract.getEmployeeType().equals(EmployeeType.CONTRACT) && permanentContract.isTemporaryContract() == false ) {
+                        if (permanentContract.getEmployeeType().equals(EmployeeType.CONTRACT) && permanentContract.isTemporaryContract() == false) {
                             empPermanentContractList.add(permanentContract);
                         }
 //                    throw new Exception("Pass expired");
@@ -165,6 +169,7 @@ public class PermanentContractController extends BaseController {
         return new ResponseEntity<>(empPermanentContractList, HttpStatus.OK);
     }
 
+
     @GetMapping("contracts")
     public ResponseEntity<List<EmpPermanentContract>> getAllContract() throws Exception {
         List<EmpPermanentContract> obj = permanentContractService.getAll(true);
@@ -173,6 +178,25 @@ public class PermanentContractController extends BaseController {
         }
         List<EmpPermanentContract> empPermanentContractList = new ArrayList<>();
         for (EmpPermanentContract permanentContract : obj) {
+            if (permanentContract.getDepartmentName() != null) {
+                Department department = departmentService.getByName(permanentContract.getDepartmentName());
+                if (department == null) {
+                    department = new Department();
+                    department.setName(permanentContract.getDepartmentName());
+                    department.setStatus(true);
+                    departmentService.save(department);
+                }
+                permanentContract.setDepartment(department);
+            }
+            if (permanentContract.getRole() != null) {
+                Designation designation = designationService.getByName(permanentContract.getRole());
+                if (designation == null) {
+                    designation = new Designation();
+                    designation.setStatus(true);
+                    designation.setName(permanentContract.getRole());
+                    designationService.save(designation);
+                }
+            }
             EmployeePass employeePass = employeePassRepo.findByEmpId(permanentContract.getId());
             if (employeePass != null) {
                 Date date = new Date();
@@ -1513,10 +1537,10 @@ public class PermanentContractController extends BaseController {
             empPermanentContract.setBelongsTo(true);
         }
 
-        if(empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)){
+        if (empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)) {
             empPermanentContract.setEmployeeType(EmployeeType.CONTRACT);
             empPermanentContract.setTemporaryContract(false);
-        }else if(empPermanentContract.getEmployeeType().equals(EmployeeType.CONTRACT)){
+        } else if (empPermanentContract.getEmployeeType().equals(EmployeeType.CONTRACT)) {
             empPermanentContract.setEmployeeType(EmployeeType.CONTRACT);
             empPermanentContract.setTemporaryContract(true);
         }
@@ -1663,10 +1687,10 @@ public class PermanentContractController extends BaseController {
     }
 
     @GetMapping("contract/expired-employees")
-    public ResponseEntity<List<EmpPermanentContract>> getExpiredList(){
+    public ResponseEntity<List<EmpPermanentContract>> getExpiredList() {
         List<EmpPermanentContract> empPermanentContracts = permanentContractService.getAll(true);
         List<EmpPermanentContract> empPermanentContractList = new ArrayList<>();
-        for (EmpPermanentContract empPermanentContract : empPermanentContracts){
+        for (EmpPermanentContract empPermanentContract : empPermanentContracts) {
             EmployeePass employeePass = employeePassRepo.findByEmpId(empPermanentContract.getId());
             if (employeePass == null) {
                 empPermanentContract.setExpiryStatus("Pass not generated");
@@ -1674,16 +1698,16 @@ public class PermanentContractController extends BaseController {
             } else if (employeePass.getEndDate().after(new Date())) {
                 empPermanentContract.setExpiryStatus("Pass expired");
                 empPermanentContractList.add(empPermanentContract);
-            }else {
-                long dates = DateUtil.getDifferenceDays(new Date(),employeePass.getEndDate());
-                if(dates<30){
+            } else {
+                long dates = DateUtil.getDifferenceDays(new Date(), employeePass.getEndDate());
+                if (dates < 30) {
                     empPermanentContract.setExpiryStatus("Pass expiring soon..");
                     empPermanentContractList.add(empPermanentContract);
                 }
             }
 
         }
-        return new ResponseEntity<>(empPermanentContractList,HttpStatus.OK);
+        return new ResponseEntity<>(empPermanentContractList, HttpStatus.OK);
     }
 
 

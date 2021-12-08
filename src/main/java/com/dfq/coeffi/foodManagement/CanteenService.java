@@ -1,5 +1,6 @@
 package com.dfq.coeffi.foodManagement;
 
+import java.util.Date;
 import java.util.List;
 
 public interface CanteenService {
@@ -25,6 +26,7 @@ public interface CanteenService {
     List<FoodTracker> getFoodTracks();
     FoodTracker getFoodTrack(long id);
     void deleteTrack(long id);
+    List<FoodTracker> todaysPunch(Date date);
 
 
 

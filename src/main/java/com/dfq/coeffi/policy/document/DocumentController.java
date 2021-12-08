@@ -35,7 +35,7 @@ public class DocumentController extends BaseController {
     }
 
     @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) throws IOException {
         // Load file as Resource
         Resource resource = fileStorageService.loadFileAsResource(fileName);
 
@@ -52,10 +52,12 @@ public class DocumentController extends BaseController {
             contentType = "application/octet-stream";
         }
 
-        return ResponseEntity.ok()
+         ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/document-category")

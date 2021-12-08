@@ -141,6 +141,65 @@ public class EmployeeAttendanceController extends BaseController {
         return new ResponseEntity<>(sheetObject, HttpStatus.OK);
     }
 
+
+    @PostMapping("employeeAttendance/selected-employee-attendance-filter-by-month")
+    public ResponseEntity<List<MonthlyEmployeeAttendanceDto>> filterBySelectedEmployeesMonth(@RequestBody DateDto dateDto) throws Exception {
+        List<MonthlyEmployeeAttendanceDto> list = new ArrayList<MonthlyEmployeeAttendanceDto>();
+        List<Employee> employees = employeeService.findAll();
+        for (Long employeeId : dateDto.getEmployeeIds()) {
+            Optional<Employee> employeeChk = employeeService.getEmployee(employeeId);
+            if (employeeChk.isPresent()) {
+                Employee employee = employeeChk.get();
+                MonthlyEmployeeAttendanceDto mADto = new MonthlyEmployeeAttendanceDto();
+                List<EmployeeAttendance> monthlyEmployeeAttendance = employeeAttendanceService.getEmployeeMontlyAttendanceByEmployeeId(DateUtil.convertDateToFormat(dateDto.getStartDate()), DateUtil.convertDateToFormat(dateDto.getEndDate()), employeeId);
+                List<MonthlyStatusDto> monthlyStatusDtos = new ArrayList<MonthlyStatusDto>();
+                for (EmployeeAttendance employeeAttendance : monthlyEmployeeAttendance) {
+                    MonthlyStatusDto dto = new MonthlyStatusDto();
+                    dto.setAttendanceStatus(employeeAttendance.getAttendanceStatus());
+                    dto.setDay(DateUtil.getDay(employeeAttendance.getMarkedOn()));
+                    dto.setMarkedOn(employeeAttendance.getMarkedOn());
+                    dto.setWorkedHours(employeeAttendance.getWorkedHours());
+                    dto.setInTime(employeeAttendance.getInTime());
+                    dto.setOutTime(employeeAttendance.getOutTime());
+                    dto.setId(employeeAttendance.getId());
+                    dto.setLateEntry(employeeAttendance.getLateEntry());
+                    monthlyStatusDtos.add(dto);
+                }
+                mADto.setEmployeeName(employee.getFirstName() + " " + employee.getLastName());
+                mADto.setMonthlyStatus(monthlyStatusDtos);
+                mADto.setEmployeeId(employee.getId());
+                mADto.setEmployeeCode(employee.getEmployeeCode());
+                if (employee.getDepartment() != null) {
+                    mADto.setDepartmentId(employee.getDepartment().getId());
+                    mADto.setDepartmentName(employee.getDepartment().getName());
+                    if (employee.getDesignation() != null) {
+                        mADto.setDesignationId(employee.getDesignation().getId());
+                        mADto.setDesignationName(employee.getDesignation().getName());
+                    } else {
+                        mADto.setDesignationId(0);
+                        mADto.setDesignationName("");
+                    }
+                } else {
+                    mADto.setDepartmentId(0);
+                    mADto.setDepartmentName("");
+                }
+
+//            updateSunday(dateDto.startDate, dateDto.endDate, employee);
+                if (employee.getDateOfJoining() != null) {
+                    if (employee.getDateOfJoining().before(dateDto.startDate) || (employee.getDateOfJoining().after(dateDto.startDate) && employee.getDateOfJoining().before(dateDto.endDate))) {
+                        list.add(mADto);
+                    }
+                }
+            }
+        }
+        if (CollectionUtils.isEmpty(list)) {
+            throw new EntityNotFoundException("EmployeeAttendances");
+        }
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+
     @PostMapping("employeeAttendance/employee-attendance-filter-by-month")
     public ResponseEntity<List<MonthlyEmployeeAttendanceDto>> filterByMonth(@RequestBody DateDto dateDto) throws Exception {
         List<MonthlyEmployeeAttendanceDto> list = new ArrayList<MonthlyEmployeeAttendanceDto>();
@@ -1772,6 +1831,10 @@ public class EmployeeAttendanceController extends BaseController {
 //        if (!DateUtil.getMonthName(dateDto.getStartDate()).equalsIgnoreCase(DateUtil.getMonthName(dateDto.getEndDate()))) {
 //            throw new EntityNotFoundException("Selected Date of Month Should be same");
 //        }
+        if(dateDto.getReportType().equalsIgnoreCase("monthly")){
+            dateDto.setStartDate(DateUtil.startDateOfMonthAndYear(dateDto.getYear(),dateDto.getMonth()));
+            dateDto.setEndDate(DateUtil.endDateOfMonthAndYear(dateDto.getYear(),dateDto.getMonth()));
+        }
         List<Date> dates = DateUtil.getDaysBetweenDates(dateDto.startDate, dateDto.endDate);
 
         List<MonthlyEmployeeAttendanceDto> monthlyEmployeeAttendanceDtos = new ArrayList<MonthlyEmployeeAttendanceDto>();
@@ -3349,14 +3412,16 @@ public class EmployeeAttendanceController extends BaseController {
         Optional<Employee> employee1 = employeeService.getEmployee(empId);
         Employee employee = employee1.get();
 
-        employee.setFirstWeekOff(departmentTrackerDto.getFirstWeekOff());
-        employee.setSecondWeekOff(departmentTrackerDto.getSecondWeekOff());
-        weekDay1 = getDayName(departmentTrackerDto.getFirstWeekOff());
-        weekDay2 = getDayName(departmentTrackerDto.getSecondWeekOff());
-        employee.setFirstWeekOffName(weekDay1);
-        employee.setSecondWeekOffName(weekDay2);
-        employeeService.save(employee);
-        setWeekOff(empId, departmentTrackerDto.getFirstWeekOff(), departmentTrackerDto.getSecondWeekOff());
+        if (departmentTrackerDto.getFirstWeekOff()>=0 && departmentTrackerDto.getSecondWeekOff()>=0) {
+            employee.setFirstWeekOff(departmentTrackerDto.getFirstWeekOff());
+            employee.setSecondWeekOff(departmentTrackerDto.getSecondWeekOff());
+            weekDay1 = getDayName(departmentTrackerDto.getFirstWeekOff());
+            weekDay2 = getDayName(departmentTrackerDto.getSecondWeekOff());
+            employee.setFirstWeekOffName(weekDay1);
+            employee.setSecondWeekOffName(weekDay2);
+            employeeService.save(employee);
+            setWeekOff(empId, departmentTrackerDto.getFirstWeekOff(), departmentTrackerDto.getSecondWeekOff());
+        }
         return new ResponseEntity<>(employee, HttpStatus.OK);
 
     }

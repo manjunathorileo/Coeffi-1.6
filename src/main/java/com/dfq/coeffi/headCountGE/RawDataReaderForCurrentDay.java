@@ -36,8 +36,6 @@ public class RawDataReaderForCurrentDay {
     @Autowired
     PermanentContractAttendanceRepo permanentContractAttendanceRepo;
     @Autowired
-    EmployeeAttendanceService employeeAttendanceService;
-    @Autowired
     VisitorService visitorService;
     @Autowired
     PermanentContractService permanentContractService;
@@ -64,11 +62,11 @@ public class RawDataReaderForCurrentDay {
         Date today = new Date();
         Date todayDate = rawDataReader.mySqlFormatDate(today);
         List<InCsvRaw> inCsvRaws = inCsvRawRepository.findByTodayDate(DateUtil.getTodayDate());
-        System.out.println("In list :"+ inCsvRaws.size());
+        System.out.println("In list :" + inCsvRaws.size());
         for (InCsvRaw employee : inCsvRaws) {
             employee.setProcessed(true);
             inCsvRawRepository.save(employee);
-            System.out.println("READING-in-Current ------" + employee.getSsoId() + " "+ employee.getLogId());
+            System.out.println("READING-in-Current ------" + employee.getSsoId() + " " + employee.getLogId());
             if (employee.getType().equalsIgnoreCase("Temp") || employee.getType().equalsIgnoreCase("Visitor")) {
                 // TODO Visitor entry
                 String name = employee.getName();
@@ -201,6 +199,7 @@ public class RawDataReaderForCurrentDay {
         getInsideEmployeesData();
         System.out.println("-------------End-----------");
     }
+
     //Only for current day
     @GetMapping("raw-read-out-csv-ui")
 //    @Scheduled(initialDelay = 1002, fixedRate = 20000)
@@ -220,7 +219,7 @@ public class RawDataReaderForCurrentDay {
                 //----------------------------------
                 List<Visitor> visitorBymobNos = visitorService.getByMobileNumberAndDateGEBE(entryDate, mobileId);
                 boolean setFlag = false;
-                System.out.println("visitorBymobNos :"+ visitorBymobNos.size());
+                System.out.println("visitorBymobNos :" + visitorBymobNos.size());
                 for (Visitor visitorBymobNo : visitorBymobNos) {
                     if (visitorBymobNo != null && visitorBymobNo.getOutTime() == null) {
 
@@ -247,8 +246,7 @@ public class RawDataReaderForCurrentDay {
                     }
                 }
 //                        System.out.println("1");
-            }
-            else if (employee.getType().equalsIgnoreCase("Employee")) {
+            } else if (employee.getType().equalsIgnoreCase("Employee")) {
                 //TODO employeeEntry
                 String name = employee.getName();
                 String employeeCode = employee.getSsoId();
@@ -308,8 +306,7 @@ public class RawDataReaderForCurrentDay {
 //                            System.out.println("2");
                 }
 
-            }
-            else if (employee.getType().equalsIgnoreCase("Contractor")) {
+            } else if (employee.getType().equalsIgnoreCase("Contractor")) {
                 //TODO contract entry
                 String name = employee.getName();
                 String employeeCode = employee.getSsoId();
@@ -371,65 +368,68 @@ public class RawDataReaderForCurrentDay {
     //TODO uncomment for ASTRA not for GE
 //    @Scheduled(initialDelay = 5000, fixedRate = 60000)
     public void getInsideEmployeesData() throws Exception {
-        List<PermanentContractAttendance> permanentContractAttendances = permanentContractService.getTodayMarkedEmployeeAttendance(DateUtil.getTodayDate());
+        if (false) { //False for GE , true for Others
+            List<PermanentContractAttendance> permanentContractAttendances = permanentContractService.getTodayMarkedEmployeeAttendance(DateUtil.getTodayDate());
 
-        System.out.println("Updating Inside");
+            System.out.println("Updating Inside");
 //        Collections.reverse(permanentContractAttendances);
-        List<Visitor> visitors = visitorService.getByMobileDate(DateUtil.getTodayDate());
+            List<Visitor> visitors = visitorService.getByMobileDate(DateUtil.getTodayDate());
 //        Collections.reverse(visitors);
-        if(permanentContractAttendances.isEmpty() && visitors.isEmpty()){
+            if (permanentContractAttendances.isEmpty() && visitors.isEmpty()) {
 //            System.out.println("Deleting inside raw");
-            insideCsvRawRepository.deleteAll();
-        }
-        for (PermanentContractAttendance permanentContractAttendance : permanentContractAttendances) {
-            System.out.println("Updating inside raw");
-            if (permanentContractAttendance.getOutTime() == null) {
-                InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(permanentContractAttendance.getEmployeeCode());
-                if (insideCsvRawOld == null) {
-                    InsideCsvRaw insideCsvRaw = new InsideCsvRaw();
-                    insideCsvRaw.setName(permanentContractAttendance.getEmployeeName());
-                    insideCsvRaw.setRecordedOn(permanentContractAttendance.getInTime());
-                    insideCsvRaw.setSsoId(permanentContractAttendance.getEmployeeCode());
-                    insideCsvRaw.setType("Contractor");
-                    EmpPermanentContract empPermanentContract = permanentContractService.get(permanentContractAttendance.getEmpId());
-                    if (empPermanentContract != null) {
-                        insideCsvRaw.setName(empPermanentContract.getFirstName());
-                        if (empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)) {
-                            insideCsvRaw.setType("Employee");
-                        } else {
-                            insideCsvRaw.setType("Contractor");
+                insideCsvRawRepository.deleteAll();
+            }
+            for (PermanentContractAttendance permanentContractAttendance : permanentContractAttendances) {
+                System.out.println("Updating inside raw");
+                if (permanentContractAttendance.getOutTime() == null) {
+                    InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(permanentContractAttendance.getEmployeeCode());
+                    if (insideCsvRawOld == null) {
+                        InsideCsvRaw insideCsvRaw = new InsideCsvRaw();
+                        insideCsvRaw.setName(permanentContractAttendance.getEmployeeName());
+                        insideCsvRaw.setRecordedOn(permanentContractAttendance.getInTime());
+                        insideCsvRaw.setSsoId(permanentContractAttendance.getEmployeeCode());
+                        insideCsvRaw.setType("Contractor");
+                        EmpPermanentContract empPermanentContract = permanentContractService.get(permanentContractAttendance.getEmpId());
+                        if (empPermanentContract != null) {
+                            insideCsvRaw.setName(empPermanentContract.getFirstName());
+                            if (empPermanentContract.getEmployeeType().equals(EmployeeType.PERMANENT_CONTRACT)) {
+                                insideCsvRaw.setType("Employee");
+                            } else {
+                                insideCsvRaw.setType("Contractor");
+                            }
+                            insideCsvRawRepository.save(insideCsvRaw);
                         }
-                        insideCsvRawRepository.save(insideCsvRaw);
+                    }
+
+                } else {
+                    InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(permanentContractAttendance.getEmployeeCode());
+                    if (insideCsvRawOld != null) {
+                        insideCsvRawRepository.delete(insideCsvRawOld);
                     }
                 }
+            }
 
-            } else {
-                InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(permanentContractAttendance.getEmployeeCode());
-                if (insideCsvRawOld != null) {
-                    insideCsvRawRepository.delete(insideCsvRawOld);
+            rawDataReader.readCsvInside();
+            for (Visitor visitor : visitors) {
+                if (visitor.getOutTime() == null) {
+                    InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(visitor.getMobileNumber());
+                    if (insideCsvRawOld == null) {
+                        InsideCsvRaw insideCsvRaw = new InsideCsvRaw();
+                        insideCsvRaw.setName(visitor.getFirstName());
+                        insideCsvRaw.setRecordedOn(new Date());
+                        insideCsvRaw.setSsoId(visitor.getMobileNumber());
+                        insideCsvRaw.setType(visitor.getVisitType());
+                        insideCsvRawRepository.save(insideCsvRaw);
+                    }
+
+                } else {
+                    InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(visitor.getMobileNumber());
+                    if (insideCsvRawOld != null) {
+                        insideCsvRawRepository.delete(insideCsvRawOld);
+                    }
                 }
             }
-        }
 
-        rawDataReader.readCsvInside();
-        for (Visitor visitor : visitors) {
-            if (visitor.getOutTime() == null) {
-                InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(visitor.getMobileNumber());
-                if (insideCsvRawOld == null) {
-                    InsideCsvRaw insideCsvRaw = new InsideCsvRaw();
-                    insideCsvRaw.setName(visitor.getFirstName());
-                    insideCsvRaw.setRecordedOn(new Date());
-                    insideCsvRaw.setSsoId(visitor.getMobileNumber());
-                    insideCsvRaw.setType(visitor.getVisitType());
-                    insideCsvRawRepository.save(insideCsvRaw);
-                }
-
-            } else {
-                InsideCsvRaw insideCsvRawOld = insideCsvRawRepository.findBySsoId(visitor.getMobileNumber());
-                if (insideCsvRawOld != null) {
-                    insideCsvRawRepository.delete(insideCsvRawOld);
-                }
-            }
         }
         rawDataReader.readCsvInside();
     }

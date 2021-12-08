@@ -44,14 +44,12 @@ public class SopStepsAssignedDocumentUploadController extends BaseController {
     }
 
     @PostMapping("sop-steps-document-upload/{sopTypeId}/{digitalSOPId}")
-    public ResponseEntity<SopStepsAssignedDocumentUpload> saveWord(@RequestParam("file") MultipartFile file, @PathVariable long sopTypeId, @PathVariable long digitalSOPId)
-    {
+    public ResponseEntity<SopStepsAssignedDocumentUpload> saveWord(@RequestParam("file") MultipartFile file, @PathVariable long sopTypeId, @PathVariable long digitalSOPId) {
         Optional<SopType> sopType = sopTypeService.getSopTypeById(sopTypeId);
         Optional<SopCategory> sopCategory = SOPCategoryService.getSopCategory(digitalSOPId);
         SopCategory SopCategoryObj = sopCategory.get();
         SopStepsAssignedDocumentUpload documentObj = sopStepsAssignedDocumentUploadService.saveDocument(file, sopType.get(), SopCategoryObj);
-        if(documentObj == null)
-        {
+        if(documentObj == null) {
             throw new EntityNotFoundException("Document not saved");
         }
         return new ResponseEntity<>(documentObj, HttpStatus.ACCEPTED);

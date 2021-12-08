@@ -10,17 +10,20 @@ import java.util.List;
 @Getter
 @Setter
 public class GatePassDto {
-        public List<Long> gatePassIds;
-        public GatePassStatus gatePassStatus;
+    public List<Long> gatePassIds;
+    public GatePassStatus gatePassStatus;
 
-        public Date inputDate;
-        public long id;
-        public String description;
+    public Date inputDate;
+    public long id;
+    public String description;
 
-        private String actualExit;
-        private String actualEntry;
+    private String actualExit;
+    private String actualEntry;
 
-
-
-
+    public String employeeCode;
+    public String employeeName;
+    public Date requestedOn;
+    public String fromTime;
+    public String toTime;
+    public String status;
 }

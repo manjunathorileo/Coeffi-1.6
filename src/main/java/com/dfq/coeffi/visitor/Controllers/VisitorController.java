@@ -283,6 +283,7 @@ public class VisitorController extends BaseController {
             payableAmount = extraHour * rate;
             visitorByMobNo.setPaymentAmt((payableAmount));
             visitorByMobNo.setExtraTime(String.valueOf(extraHour));
+            visitorByMobNo.setTotalHours(stayedHrs);
         } else {
             visitorByMobNo.setPaymentAmt(0);
             visitorByMobNo.setExtraTime("0");
@@ -344,7 +345,9 @@ public class VisitorController extends BaseController {
     public void saveAndRegisterVisitor(@RequestBody VisitorPass visitorPass) throws Exception {
         VisitorPass visitorPass1 = visitorPassService.getByMobileNumber(visitorPass.getMobileNumber());
         if (visitorPass1 != null) {
-            throw new Exception("Already registered");
+            if (visitorPass1.getId()!=visitorPass.getId()) {
+                throw new Exception("Already registered");
+            }
         }
         visitorPassService.save(visitorPass);
     }
@@ -357,9 +360,9 @@ public class VisitorController extends BaseController {
             visitorPass.setEndDate(visitorDto.getPassEndDate());
             visitorPass.setRfid(visitorDto.getRfid());
             visitorPass.setAllowedOrDenied(true);
-            if (visitorPass.getEmail() != null) {
-                sendEmai(visitorPass.getEmail(), "Visitor_Pass", "Your pass for the visit from: " + visitorPass.getStartDate() + " to: " + visitorPass.getEndDate() + " please carry copy of this email before you visit");
-            }
+//            if (visitorPass.getEmail() != null) {
+//                sendEmai(visitorPass.getEmail(), "Visitor_Pass", "Your pass for the visit from: " + visitorPass.getStartDate() + " to: " + visitorPass.getEndDate() + " please carry copy of this email before you visit");
+//            }
             visitorPassService.save(visitorPass);
         }
         return new ResponseEntity<>(visitorPass, HttpStatus.OK);

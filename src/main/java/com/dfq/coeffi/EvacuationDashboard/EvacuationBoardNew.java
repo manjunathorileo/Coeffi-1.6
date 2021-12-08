@@ -16,7 +16,6 @@ import com.dfq.coeffi.entity.payroll.EmployeeAttendance;
 import com.dfq.coeffi.evacuationApi.InsideCsvRaw;
 import com.dfq.coeffi.evacuationApi.InsideCsvRawRepository;
 import com.dfq.coeffi.repository.payroll.EmployeeAttendanceRepository;
-import com.dfq.coeffi.superadmin.Entity.CompanyConfigure;
 import com.dfq.coeffi.superadmin.Services.CompanyConfigureService;
 import com.dfq.coeffi.util.DateUtil;
 import com.dfq.coeffi.visitor.Entities.Visitor;
@@ -42,7 +41,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static jxl.format.Alignment.*;
@@ -76,9 +78,6 @@ public class EvacuationBoardNew extends BaseController {
     @GetMapping("evacuation/permanent-contract")
     public ResponseEntity<List<EvacuationDto>> getContractEmployeeAttendanceReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParseException {
 
-//        if (!DateUtil.getMonthName(dateDto.getStartDate()).equalsIgnoreCase(DateUtil.getMonthName(dateDto.getEndDate()))) {
-//            throw new EntityNotFoundException("Selected Date of Month Should be same");
-//        }
         List<EvacuationDto> monthlyEmployeeAttendanceDtos = getReportByType("EMPLOYEE");
         OutputStream out = null;
         String fileName = "Permanent-Contract-Report_";

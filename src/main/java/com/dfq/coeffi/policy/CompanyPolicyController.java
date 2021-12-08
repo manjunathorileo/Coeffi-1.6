@@ -74,7 +74,7 @@ public class CompanyPolicyController extends BaseController {
     }
 
     @GetMapping("company-policy/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) throws IOException {
         // Load file as Resource
         Resource resource = fileStorageService.loadFileAsResource(fileName);
 

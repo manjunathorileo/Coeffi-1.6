@@ -4,15 +4,21 @@ import com.dfq.coeffi.advanceFoodManagementExtra.EmployeeCanteenAttendanceServic
 import com.dfq.coeffi.advanceFoodManagementExtra.EmployeeCanteenDetails;
 import com.dfq.coeffi.advanceFoodManagementExtra.EmployeeCanteenDetailsService;
 import com.dfq.coeffi.controller.BaseController;
+import com.dfq.coeffi.foodManagement.orderTracking.foodEstimationTimings.FoodEstimationTimings;
+import com.dfq.coeffi.foodManagement.orderTracking.foodOrderTracking.FoodOrderTrackingService;
+import com.dfq.coeffi.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +30,10 @@ public class CanteenController extends BaseController {
 
     @PostMapping("canteen/food-time")
     public void saveFoodTimeMaster(@RequestBody FoodTimeMaster foodTimeMaster) {
+        FoodTimeMaster foodTimingsOverLap = getCurrentFoodEstimate(foodTimeMaster);
+        if (foodTimingsOverLap != null) {
+            throw new EntityExistsException("Food usage  already exists for this timings");
+        }
         canteenService.createFoodTime(foodTimeMaster);
     }
 
@@ -104,6 +114,60 @@ public class CanteenController extends BaseController {
     @Autowired
     EmployeeCanteenAttendanceService employeeCanteenAttendanceService;
 
+
+    @GetMapping("food-usage-timing/current-live")
+    public ResponseEntity<FoodTimeMaster> getCurrentFoodEstimate() {
+        FoodTimeMaster foodEstimationTimingsObj = new FoodTimeMaster();
+        int orderHour = DateUtil.getRunningHour(new Date());
+        List<FoodTimeMaster> foodEstimationTimingsList = canteenService.getFoodTimes();
+        List<FoodTimeMaster> foodEstimationTimingsList1 = new ArrayList<>();
+        for (FoodTimeMaster foodEstimationTimings : foodEstimationTimingsList) {
+            int startHour = DateUtil.getRunningHour(foodEstimationTimings.getTimeFrom());
+            int endHour = DateUtil.getRunningHour(foodEstimationTimings.getTimeTo());
+            if (orderHour >= startHour && orderHour <= endHour) {
+                foodEstimationTimingsList1.add(foodEstimationTimings);
+            }
+        }
+        if (!foodEstimationTimingsList1.isEmpty()) {
+            Collections.reverse(foodEstimationTimingsList1);
+            foodEstimationTimingsObj = foodEstimationTimingsList1.get(0);
+        }
+        return new ResponseEntity<>(foodEstimationTimingsObj, HttpStatus.OK);
+    }
+
+    public FoodTimeMaster getCurrentFoodEstimate(FoodTimeMaster foodTimeMasterPayload) {
+        FoodTimeMaster foodEstimationTimingsObj = null;
+        int orderHour = DateUtil.getRunningHour(foodTimeMasterPayload.getTimeFrom());
+        List<FoodTimeMaster> foodEstimationTimingsList = canteenService.getFoodTimes();
+        List<FoodTimeMaster> foodEstimationTimingsList1 = new ArrayList<>();
+        for (FoodTimeMaster foodEstimationTimings : foodEstimationTimingsList) {
+            int startHour = DateUtil.getRunningHour(foodEstimationTimings.getTimeFrom());
+            int endHour = DateUtil.getRunningHour(foodEstimationTimings.getTimeTo());
+            if (orderHour >= startHour && orderHour <= endHour) {
+                foodEstimationTimingsList1.add(foodEstimationTimings);
+            }
+        }
+        if (!foodEstimationTimingsList1.isEmpty()) {
+            Collections.reverse(foodEstimationTimingsList1);
+            foodEstimationTimingsObj = foodEstimationTimingsList1.get(0);
+        }
+        return foodEstimationTimingsObj;
+    }
+
+
+    @Autowired
+    FoodTrackerRepository foodTrackerRepository;
+
+    @GetMapping("canteen/latest-food-punch")
+    public ResponseEntity<FoodTracker> getLatest() {
+        List<FoodTracker> foodTrackers = foodTrackerRepository.findByMarkedOn(new Date());
+        Collections.reverse(foodTrackers);
+        FoodTracker foodTracker = new FoodTracker();
+        if (!foodTrackers.isEmpty()) {
+            foodTracker = foodTrackers.get(0);
+        }
+        return new ResponseEntity<>(foodTracker, HttpStatus.OK);
+    }
 
 
 }

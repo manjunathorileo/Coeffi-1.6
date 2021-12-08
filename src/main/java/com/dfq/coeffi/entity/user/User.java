@@ -41,6 +41,8 @@ public class User
 	@ManyToMany(cascade = CascadeType.ALL)
 	private List<Role> roles;
 
+	private long empId;
+
 	public User(){}
 	
 	public User(User user) {

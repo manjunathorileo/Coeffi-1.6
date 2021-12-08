@@ -89,5 +89,7 @@ public class Visitor {
     @UpdateTimestamp
     private Date recordedTime;
 
+    private double totalHours;
+
 }
 

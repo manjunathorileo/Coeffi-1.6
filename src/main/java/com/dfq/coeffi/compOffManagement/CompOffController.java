@@ -123,7 +123,7 @@ public class CompOffController extends BaseController {
         compOff.setCompOffApprovedBy(employeef.get().getFirstName() + employeef.get().getLastName());
         compOffRepository.save(compOff);
         //TODO tracker
-        //-------------tracker---------------
+        //-------------tracker---------------zz
         String month = DateUtil.getMonthName(compOff.getCompOffGenDate());
         String year = String.valueOf(DateUtil.getCurrentYear());
         CompOffTracker compOffTracker = compOffTrackerRepository.findByEmployeeIdAndMonthAndYear(compOff.getEmployeeId(), month, year);
@@ -212,7 +212,7 @@ public class CompOffController extends BaseController {
             compOff.setReason(employeeShiftAssignmentDto.getReason());
             compOffRepository.save(compOff);
             //-------------tracker---------------
-            //TODO tracker
+            //TODO tracker  zz
             //-------------tracker---------------
             String month = DateUtil.getMonthName(compOff.getCompOffGenDate());
             String year = String.valueOf(DateUtil.getCurrentYear());

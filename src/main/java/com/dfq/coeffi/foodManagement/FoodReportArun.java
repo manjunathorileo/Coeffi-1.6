@@ -195,7 +195,9 @@ public class FoodReportArun extends BaseController {
         s.addCell(new Label(8, 1, "Dinner Rate", cellFormat));
         s.addCell(new Label(9, 1, "Snacks Availed", cellFormat));
         s.addCell(new Label(10, 1, "Snacks Rate", cellFormat));
-        s.addCell(new Label(11, 1, "Total", cellFormat));
+        s.addCell(new Label(11, 1, "Midnight-Snack Availed", cellFormat));
+        s.addCell(new Label(12, 1, "Midnight-Snack Rate", cellFormat));
+        s.addCell(new Label(13, 1, "Total", cellFormat));
 
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -217,13 +219,15 @@ public class FoodReportArun extends BaseController {
             s.addCell(new Label(8, rownum, "" + foodTracker.getDinnerRate(), cLeft));
             s.addCell(new Label(9, rownum, "" + foodTracker.getSnacksAvailed(), cLeft));
             s.addCell(new Label(10, rownum, "" + foodTracker.getSnacksRate(), cLeft));
-            s.addCell(new Label(11, rownum, "" + foodTracker.getTotalToday(), cLeft));
+            s.addCell(new Label(11, rownum, "" + foodTracker.getMidnightSnackAvailed(), cLeft));
+            s.addCell(new Label(12, rownum, "" + foodTracker.getMidnightSnackRate(), cLeft));
+            s.addCell(new Label(13, rownum, "" + foodTracker.getTotalToday(), cLeft));
             rownum++;
         }
 
         rownum = rownum + 2;
-        s.addCell(new Label(11, rownum, "" + "GrandTotal", cellFormat));
-        s.addCell(new Label(11, rownum + 1, "" + grandTotal, cLeft));
+        s.addCell(new Label(13, rownum, "" + "GrandTotal", cellFormat));
+        s.addCell(new Label(13, rownum + 1, "" + grandTotal, cLeft));
 
         return workbook;
     }
@@ -248,16 +252,19 @@ public class FoodReportArun extends BaseController {
             long lunchAvailedEmp = 0;
             long snacksAvailedEmp = 0;
             long dinnerAvailedEmp = 0;
+            long midnightAvailedEmp = 0;
 
             long bfAvailedVis = 0;
             long lunchAvailedVis = 0;
             long snacksAvailedVis = 0;
             long dinnerAvailedVis = 0;
+            long midnightAvailedVis =0;
 
             long bfAvailedCon = 0;
             long lunchAvailedCon = 0;
             long snacksAvailedCon = 0;
             long dinnerAvailedCon = 0;
+            long midnightAvailedCon = 0;
 
 
             foodReportDtoEmp.setEmployeeType("EMPLOYEE");
@@ -282,6 +289,10 @@ public class FoodReportArun extends BaseController {
                     CatererSettings catererSettings = canteenService.getCatererSetting("DINNER", "EMPLOYEE");
                     foodReportDtoEmp.setDinnerRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
                     dinnerAvailedEmp++;
+                }else if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                    CatererSettings catererSettings = canteenService.getCatererSetting("MIDNIGHT_SNACK", "EMPLOYEE");
+                    foodReportDtoEmp.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                    midnightAvailedEmp++;
                 }
 
             }
@@ -292,7 +303,12 @@ public class FoodReportArun extends BaseController {
             foodReportDtoEmp.setEmployeeType("EMPLOYEE");
             foodReportDtoEmp.setSnacksAvailed(snacksAvailedEmp);
             foodReportDtoEmp.setDinnerAvailed(dinnerAvailedEmp);
-            foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) + (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) + (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) + (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
+            foodReportDtoEmp.setMidnightSnackAvailed(midnightAvailedEmp);
+            foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) +
+                    (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) +
+                    (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) +
+                    (foodReportDtoEmp.getMidnightSnackRate() * midnightAvailedEmp) +
+                    (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
 
 
             for (FoodTracker foodTracker : foodTrackerVis) {
@@ -312,6 +328,10 @@ public class FoodReportArun extends BaseController {
                     CatererSettings catererSettings = canteenService.getCatererSetting("DINNER", "VISITOR");
                     foodReportDtoVis.setDinnerRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
                     dinnerAvailedVis++;
+                }else if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                    CatererSettings catererSettings = canteenService.getCatererSetting("MIDNIGHT_SNACK", "VISITOR");
+                    foodReportDtoVis.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                    midnightAvailedVis++;
                 }
             }
             foodReportDtoVis.setBfAvailed(bfAvailedVis);
@@ -319,11 +339,13 @@ public class FoodReportArun extends BaseController {
             foodReportDtoVis.setSnacksAvailed(snacksAvailedVis);
             foodReportDtoVis.setEmployeeType("VISITOR");
             foodReportDtoVis.setDinnerAvailed(dinnerAvailedVis);
+            foodReportDtoVis.setMidnightSnackAvailed(midnightAvailedVis);
             foodReportDtoVis.setMarkedOn(date);
 
             foodReportDtoVis.setTotalToday((foodReportDtoVis.getBfRate() * bfAvailedVis) +
                     (foodReportDtoVis.getSnacksRate() * snacksAvailedVis) +
                     (foodReportDtoVis.getLunchRate() * lunchAvailedVis) +
+                    (foodReportDtoVis.getMidnightSnackRate() * midnightAvailedVis) +
                     (foodReportDtoVis.getDinnerRate() * dinnerAvailedVis));
 
 
@@ -346,17 +368,23 @@ public class FoodReportArun extends BaseController {
                     CatererSettings catererSettings = canteenService.getCatererSetting("DINNER", "CONTRACT");
                     foodReportDtoCont.setDinnerRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
                     dinnerAvailedCon++;
+                }else if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                    CatererSettings catererSettings = canteenService.getCatererSetting("MIDNIGHT_SNACK", "CONTRACT");
+                    foodReportDtoCont.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                    midnightAvailedCon++;
                 }
             }
             foodReportDtoCont.setBfAvailed(bfAvailedCon);
             foodReportDtoCont.setLunchAvailed(lunchAvailedCon);
             foodReportDtoCont.setSnacksAvailed(snacksAvailedCon);
             foodReportDtoCont.setDinnerAvailed(dinnerAvailedCon);
+            foodReportDtoCont.setMidnightSnackAvailed(midnightAvailedCon);
             foodReportDtoCont.setEmployeeType("CONTRACT");
             foodReportDtoCont.setMarkedOn(date);
             foodReportDtoCont.setTotalToday((foodReportDtoCont.getBfRate() * bfAvailedCon) +
                     (foodReportDtoCont.getSnacksRate() * snacksAvailedCon) +
                     (foodReportDtoCont.getLunchRate() * lunchAvailedCon) +
+                    (foodReportDtoCont.getMidnightSnackRate() * midnightAvailedCon) +
                     (foodReportDtoCont.getDinnerRate() * dinnerAvailedCon));
             //--con
 
@@ -589,6 +617,7 @@ public class FoodReportArun extends BaseController {
             s.addCell(new Label(0, rowNum + 3, "LUNCH", cellFormat));
             s.addCell(new Label(0, rowNum + 4, "SNACK", cellFormat));
             s.addCell(new Label(0, rowNum + 5, "DINNER", cellFormat));
+            s.addCell(new Label(0, rowNum + 6, "MIDNIGHT SNACK", cellFormat));
 
             int j = colNum;
             List<Date> dates = DateUtil.getDaysBetweenDates(dateDto.startDate, dateDto.endDate);
@@ -603,6 +632,7 @@ public class FoodReportArun extends BaseController {
             s.addCell(new Label(j + 1, rowNum + 3, "Total Lunch", cellFormat));
             s.addCell(new Label(j + 1, rowNum + 4, "Total Snack", cellFormat));
             s.addCell(new Label(j + 1, rowNum + 5, "Total Dinner", cellFormat));
+            s.addCell(new Label(j + 1, rowNum + 6, "Total Midnight Snack", cellFormat));
 
             int noOfDays = DateUtil.calculateDaysBetweenDate(dateDto.startDate, dateDto.endDate);
             for (int m = 0; m <= noOfDays; m++) {
@@ -611,6 +641,7 @@ public class FoodReportArun extends BaseController {
                 s.addCell(new Label(colNum, rowNum + 3, String.valueOf(foodReportDto.getMonthlyStatusDtos().get(m).getSingleEntryLaunch()), c));
                 s.addCell(new Label(colNum, rowNum + 4, String.valueOf(foodReportDto.getMonthlyStatusDtos().get(m).getSingleEntrySnaks()), c));
                 s.addCell(new Label(colNum, rowNum + 5, String.valueOf(foodReportDto.getMonthlyStatusDtos().get(m).getSingleEntryDinner()), c));
+                s.addCell(new Label(colNum, rowNum + 6, String.valueOf(foodReportDto.getMonthlyStatusDtos().get(m).getSingleEntryMidnightSnack()), c));
                 colNum = colNum + 1;
 
             }
@@ -619,7 +650,8 @@ public class FoodReportArun extends BaseController {
             s.addCell(new Label(j + 2, rowNum + 3, String.valueOf(foodReportDto.getLunchAvailed()), c));
             s.addCell(new Label(j + 2, rowNum + 4, String.valueOf(foodReportDto.getSnacksAvailed()), c));
             s.addCell(new Label(j + 2, rowNum + 5, String.valueOf(foodReportDto.getDinnerAvailed()), c));
-            rowNum = rowNum + 7;
+            s.addCell(new Label(j + 2, rowNum + 6, String.valueOf(foodReportDto.getMidnightSnackAvailed()), c));
+            rowNum = rowNum + 8;
         }
         return workbook;
     }
@@ -853,6 +885,7 @@ public class FoodReportArun extends BaseController {
                         long lunchAvailedEmp = 0;
                         long snacksAvailedEmp = 0;
                         long dinnerAvailedEmp = 0;
+                        long midnightSnackAvailedEmp = 0;
                         String companyName = "";
                         String location = "";
 
@@ -862,6 +895,7 @@ public class FoodReportArun extends BaseController {
                             long singlelunchEmp = 0;
                             long singleSnaksEmp = 0;
                             long singledinnerEmp = 0;
+                            long singleMidnightSnackEmp = 0;
 
                             foodReportDtoEmp.setEmployeeType(dateDto.getEmployeeType());
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -901,12 +935,20 @@ public class FoodReportArun extends BaseController {
                                     dinnerAvailedEmp++;
                                     singledinnerEmp++;
                                 }
+                                if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                                    System.out.println("B");
+                                    CatererSettings catererSettings = canteenService.getCatererSetting(foodTracker.getFoodType(), foodTracker.getEmployeeType());
+                                    foodReportDtoEmp.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                                    midnightSnackAvailedEmp++;
+                                    singleMidnightSnackEmp++;
+                                }
 
                             }
                             monthlyStatusDto.setSingleEntryBf(singleBfEmp);
                             monthlyStatusDto.setSingleEntryLaunch(singlelunchEmp);
                             monthlyStatusDto.setSingleEntrySnaks(singleSnaksEmp);
                             monthlyStatusDto.setSingleEntryDinner(singledinnerEmp);
+                            monthlyStatusDto.setSingleEntryMidnightSnack(singleMidnightSnackEmp);
                             monthlyStatusDto.setMarkedOn(date);
                             monthlyStatusDtos.add(monthlyStatusDto);
 
@@ -931,7 +973,12 @@ public class FoodReportArun extends BaseController {
                         foodReportDtoEmp.setEmployeeType("EMPLOYEE");
                         foodReportDtoEmp.setSnacksAvailed(snacksAvailedEmp);
                         foodReportDtoEmp.setDinnerAvailed(dinnerAvailedEmp);
-                        foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) + (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) + (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) + (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
+                        foodReportDtoEmp.setMidnightSnackAvailed(midnightSnackAvailedEmp);
+                        foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) +
+                                (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) +
+                                (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) +
+                                (foodReportDtoEmp.getMidnightSnackRate() * midnightSnackAvailedEmp)+
+                                (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
                         foodTrackerDtoList.add(foodReportDtoEmp);
 
                     }
@@ -950,6 +997,7 @@ public class FoodReportArun extends BaseController {
                     long lunchAvailedEmp = 0;
                     long snacksAvailedEmp = 0;
                     long dinnerAvailedEmp = 0;
+                    long midnightSnackAvailedEmp = 0;
                     String companyName="";
                     String location ="";
 
@@ -959,6 +1007,7 @@ public class FoodReportArun extends BaseController {
                         long singlelunchEmp = 0;
                         long singleSnaksEmp = 0;
                         long singledinnerEmp = 0;
+                        long singleMidnightSnackEmp = 0;
 
                         foodReportDtoEmp.setEmployeeType(dateDto.getEmployeeType());
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -998,12 +1047,20 @@ public class FoodReportArun extends BaseController {
                                 dinnerAvailedEmp++;
                                 singledinnerEmp++;
                             }
+                            if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                                System.out.println("B");
+                                CatererSettings catererSettings = canteenService.getCatererSetting(foodTracker.getFoodType(), foodTracker.getEmployeeType());
+                                foodReportDtoEmp.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                                midnightSnackAvailedEmp++;
+                                singleMidnightSnackEmp++;
+                            }
 
                         }
                         monthlyStatusDto.setSingleEntryBf(singleBfEmp);
                         monthlyStatusDto.setSingleEntryLaunch(singlelunchEmp);
                         monthlyStatusDto.setSingleEntrySnaks(singleSnaksEmp);
                         monthlyStatusDto.setSingleEntryDinner(singledinnerEmp);
+                        monthlyStatusDto.setSingleEntryMidnightSnack(singleMidnightSnackEmp);
                         monthlyStatusDto.setMarkedOn(date);
                         monthlyStatusDtos.add(monthlyStatusDto);
 
@@ -1017,12 +1074,17 @@ public class FoodReportArun extends BaseController {
                     foodReportDtoEmp.setEmployeeType("CONTRACT");
                     foodReportDtoEmp.setSnacksAvailed(snacksAvailedEmp);
                     foodReportDtoEmp.setDinnerAvailed(dinnerAvailedEmp);
+                    foodReportDtoEmp.setMidnightSnackAvailed(midnightSnackAvailedEmp);
                     if (employee.getDepartmentName() != null) {
                         foodReportDtoEmp.setDepartment(employee.getDepartmentName());
                     }
                     foodReportDtoEmp.setCompany(companyName);
                     foodReportDtoEmp.setLocation(location);
-                    foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) + (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) + (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) + (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
+                    foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) +
+                            (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) +
+                            (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) +
+                            (foodReportDtoEmp.getMidnightSnackRate() * midnightSnackAvailedEmp)+
+                            (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
                     foodTrackerDtoList.add(foodReportDtoEmp);
 
                 }
@@ -1038,6 +1100,7 @@ public class FoodReportArun extends BaseController {
                 long lunchAvailedEmp = 0;
                 long snacksAvailedEmp = 0;
                 long dinnerAvailedEmp = 0;
+                long midnightSnackAvailedEmp = 0;
                 String companyName = "";
                 String location = "";
 
@@ -1047,6 +1110,7 @@ public class FoodReportArun extends BaseController {
                     long singlelunchEmp = 0;
                     long singleSnaksEmp = 0;
                     long singledinnerEmp = 0;
+                    long singleMidnightSnackEmp = 0;
 
                     foodReportDtoEmp.setEmployeeType(dateDto.getEmployeeType());
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -1086,12 +1150,21 @@ public class FoodReportArun extends BaseController {
                             dinnerAvailedEmp++;
                             singledinnerEmp++;
                         }
+                        if (foodTracker.getFoodType().equalsIgnoreCase("MIDNIGHT_SNACK")) {
+                            System.out.println("B");
+                            CatererSettings catererSettings = canteenService.getCatererSetting(foodTracker.getFoodType(), foodTracker.getEmployeeType());
+                            foodReportDtoEmp.setMidnightSnackRate(catererSettings.getEmployeeRate() + catererSettings.getEmployerRate());
+                            midnightSnackAvailedEmp++;
+                            singleMidnightSnackEmp++;
+                        }
+
 
                     }
                     monthlyStatusDto.setSingleEntryBf(singleBfEmp);
                     monthlyStatusDto.setSingleEntryLaunch(singlelunchEmp);
                     monthlyStatusDto.setSingleEntrySnaks(singleSnaksEmp);
                     monthlyStatusDto.setSingleEntryDinner(singledinnerEmp);
+                    monthlyStatusDto.setSingleEntryMidnightSnack(singleMidnightSnackEmp);
                     monthlyStatusDto.setMarkedOn(date);
                     monthlyStatusDtos.add(monthlyStatusDto);
 
@@ -1105,12 +1178,17 @@ public class FoodReportArun extends BaseController {
                 foodReportDtoEmp.setEmployeeType("VISITOR");
                 foodReportDtoEmp.setSnacksAvailed(snacksAvailedEmp);
                 foodReportDtoEmp.setDinnerAvailed(dinnerAvailedEmp);
+                foodReportDtoEmp.setMidnightSnackAvailed(midnightSnackAvailedEmp);
                 if (employee.getDepartmentName() != null) {
                     foodReportDtoEmp.setDepartment(employee.getDepartmentName());
                 }
                 foodReportDtoEmp.setCompany(companyName);
                 foodReportDtoEmp.setLocation(location);
-                foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) + (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) + (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) + (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
+                foodReportDtoEmp.setTotalToday((foodReportDtoEmp.getBfRate() * bfAvailedEmp) +
+                        (foodReportDtoEmp.getSnacksRate() * snacksAvailedEmp) +
+                        (foodReportDtoEmp.getLunchRate() * lunchAvailedEmp) +
+                        (foodReportDtoEmp.getMidnightSnackRate() * midnightSnackAvailedEmp) +
+                        (foodReportDtoEmp.getDinnerRate() * dinnerAvailedEmp));
                 foodTrackerDtoList.add(foodReportDtoEmp);
 
             }

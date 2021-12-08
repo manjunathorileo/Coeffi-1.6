@@ -10,7 +10,7 @@ import java.util.List;
 public interface FileStorageService {
 
     Document storeFile(MultipartFile file);
-    Resource loadFileAsResource(String fileName);
+    Resource loadFileAsResource(String fileName) throws IOException;
 
     DocumentCategory createDocumentCategory(DocumentCategory documentCategory);
     DocumentCategory getDocumentCategory(long id);

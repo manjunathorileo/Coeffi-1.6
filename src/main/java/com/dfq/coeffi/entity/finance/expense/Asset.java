@@ -11,8 +11,7 @@ import java.util.Date;
 @Getter
 @Entity
 @Table(name="asset_tracking")
-public class Asset
-{
+public class Asset {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;

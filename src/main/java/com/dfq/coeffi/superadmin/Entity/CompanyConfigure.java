@@ -399,6 +399,7 @@ public class CompanyConfigure {
 
     private boolean releaveWithExitProcess;
     private boolean attendanceWithHeadCount;
+    private String shopFloorModuleName;
 
     //-------Gate assignment---
 //    private EmployeeType gateAssignEmployeeType;
@@ -406,4 +407,6 @@ public class CompanyConfigure {
 //    private List<Long> inGateIds;
 //    @ManyToMany
 //    private List<Long> outGateIds;
+
+    private boolean foodEstimateModule;
 }

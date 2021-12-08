@@ -1,21 +1,28 @@
 package com.dfq.coeffi.controller.leave;
 
+import com.dfq.coeffi.CompanySettings.Entity.CompanyName;
+import com.dfq.coeffi.EvacuationDashboard.EvacuationDto;
 import com.dfq.coeffi.Gate.Entity.EmployeeGateAssignment;
 import com.dfq.coeffi.Gate.Entity.Gate;
 import com.dfq.coeffi.Gate.Service.EmployeeGateAssignmentService;
 import com.dfq.coeffi.Gate.Service.GateService;
 import com.dfq.coeffi.controller.BaseController;
 import com.dfq.coeffi.dto.GatePassDto;
+import com.dfq.coeffi.employeePermanentContract.entities.EmpPermanentContract;
 import com.dfq.coeffi.entity.hr.employee.Employee;
 import com.dfq.coeffi.entity.hr.employee.EmployeeType;
 import com.dfq.coeffi.entity.leave.EmployeeGatePass;
 import com.dfq.coeffi.entity.leave.GatePassStatus;
 import com.dfq.coeffi.entity.leave.LeaveStatus;
 import com.dfq.coeffi.entity.master.AcademicYear;
+import com.dfq.coeffi.evacuationApi.InsideCsvRaw;
 import com.dfq.coeffi.service.AcademicYearService;
 import com.dfq.coeffi.service.hr.EmployeeService;
 import com.dfq.coeffi.service.leave.EmployeeGatePassService;
 import com.dfq.coeffi.util.DateUtil;
+import com.dfq.coeffi.visitor.Entities.VisitorPass;
+import jxl.format.BorderLineStyle;
+import jxl.write.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -29,10 +36,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static jxl.format.Alignment.*;
+import static jxl.format.Alignment.LEFT;
 
 @RestController
 @Slf4j
@@ -454,6 +471,150 @@ public class EmployeeGatePassController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("gate-pass/approved-download")
+    public ResponseEntity<List<GatePassDto>> getEmployeeGatePass(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParseException {
+
+        List<GatePassDto> monthlyEmployeeAttendanceDtos = getGatePassByStatus(GatePassStatus.APPROVED);
+        OutputStream out = null;
+        String fileName = "Permanent-Contract-Report_";
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".xls");
+        WritableWorkbook workbook = jxl.Workbook.createWorkbook(response.getOutputStream());
+        try {
+            if (monthlyEmployeeAttendanceDtos != null) {
+                attendanceEntry(workbook, monthlyEmployeeAttendanceDtos, response, 0);
+            }
+            if (monthlyEmployeeAttendanceDtos.isEmpty())
+                throw new EntityNotFoundException("No entries today");
+            workbook.write();
+            workbook.close();
+        } catch (Exception e) {
+            throw new ServletException("Exception in excel download", e);
+        } finally {
+            if (out != null)
+                out.close();
+        }
+        return new ResponseEntity(monthlyEmployeeAttendanceDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("gate-pass/rejected-download")
+    public ResponseEntity<List<GatePassDto>> getEmployeeGatePassRej(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParseException {
+
+        List<GatePassDto> monthlyEmployeeAttendanceDtos = getGatePassByStatus(GatePassStatus.REJECTED);
+        OutputStream out = null;
+        String fileName = "Permanent-Contract-Report_";
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".xls");
+        WritableWorkbook workbook = jxl.Workbook.createWorkbook(response.getOutputStream());
+        try {
+            if (monthlyEmployeeAttendanceDtos != null) {
+                attendanceEntry(workbook, monthlyEmployeeAttendanceDtos, response, 0);
+            }
+            if (monthlyEmployeeAttendanceDtos.isEmpty())
+                throw new EntityNotFoundException("No entries today");
+            workbook.write();
+            workbook.close();
+        } catch (Exception e) {
+            throw new ServletException("Exception in excel download", e);
+        } finally {
+            if (out != null)
+                out.close();
+        }
+        return new ResponseEntity(monthlyEmployeeAttendanceDtos, HttpStatus.OK);
+    }
+
+    public List<GatePassDto> getGatePassByStatus(GatePassStatus status) {
+        List<EmployeeGatePass> gatePasses = employeeGatePassService.getApprovedEmployeeGatePass(status);
+        List<GatePassDto> gatePassDtos = new ArrayList<>();
+        for (EmployeeGatePass gatePass:gatePasses){
+            GatePassDto gatePassDto = new GatePassDto();
+            gatePassDto.setEmployeeCode(gatePass.getEmployeeObject().getEmployeeCode());
+            gatePassDto.setEmployeeName(gatePass.getEmployeeName());
+            gatePassDto.setRequestedOn(gatePass.getGatePassRequestOn());
+            gatePassDto.setFromTime(gatePass.getFromTime());
+            gatePassDto.setToTime(gatePass.getToTime());
+            gatePassDtos.add(gatePassDto);
+        }
+        return gatePassDtos;
+    }
+
+    private WritableWorkbook attendanceEntry(WritableWorkbook workbook, List<GatePassDto> gatePassDtos, HttpServletResponse response, int index) throws IOException, WriteException {
+        WritableSheet s = workbook.createSheet("Gate pass", index);
+        s.getSettings().setPrintGridLines(false);
+        WritableFont headerFont = new WritableFont(WritableFont.TIMES, 10);
+        headerFont.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
+        headerFormat.setAlignment(CENTRE);
+        WritableFont headerFontLeft = new WritableFont(WritableFont.TIMES, 7);
+        headerFontLeft.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat headerFormatLeft = new WritableCellFormat(headerFontLeft);
+        headerFormatLeft.setAlignment(LEFT);
+        WritableFont headerFontRight = new WritableFont(WritableFont.TIMES, 7);
+        headerFontRight.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat headerFormatRight = new WritableCellFormat(headerFontRight);
+        headerFormatRight.setAlignment(RIGHT);
+        WritableFont cellFont = new WritableFont(WritableFont.TIMES);
+        cellFont.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat cellFormat = new WritableCellFormat(cellFont);
+        cellFormat.setAlignment(CENTRE);
+        cellFormat.setBackground(jxl.format.Colour.GRAY_25);
+        WritableCellFormat cellFormatDate = new WritableCellFormat(cellFont);
+        cellFormatDate.setAlignment(CENTRE);
+        cellFormatDate.setBackground(jxl.format.Colour.ICE_BLUE);
+        WritableFont cellFontRight = new WritableFont(WritableFont.TIMES);
+        cellFontRight.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat cellFormatRight = new WritableCellFormat(cellFontRight);
+        cellFormatRight.setAlignment(RIGHT);
+        WritableFont cellFontLeft = new WritableFont(WritableFont.TIMES);
+        cellFontLeft.setBoldStyle(WritableFont.BOLD);
+        WritableCellFormat cellFormatLeft = new WritableCellFormat(cellFontLeft);
+        cellFormatLeft.setAlignment(LEFT);
+        WritableFont cellFontSimpleRight = new WritableFont(WritableFont.TIMES);
+        WritableCellFormat cellFormatSimpleRight = new WritableCellFormat(cellFontSimpleRight);
+        cellFormatSimpleRight.setAlignment(RIGHT);
+
+        WritableFont cf = new WritableFont(WritableFont.ARIAL, 7);
+        WritableCellFormat cLeft = new WritableCellFormat(cf);
+        cLeft.setAlignment(LEFT);
+        cLeft.setBackground(jxl.format.Colour.ICE_BLUE);
+        cLeft.setBorder(jxl.format.Border.ALL, BorderLineStyle.THIN);
+
+        s.setColumnView(0, 10);
+        s.setColumnView(1, 20);
+        s.setColumnView(2, 20);
+        s.setColumnView(3, 20);
+        s.setColumnView(4, 20);
+        s.setColumnView(5, 20);
+        s.setColumnView(6, 10);
+        s.setColumnView(7, 15);
+        s.setColumnView(8, 15);
+
+        s.mergeCells(0, 0, 4, 0);
+        Label lable = new Label(0, 0, "Permanent Employees Live Head Count Report - On: " + DateUtil.mySqlFormatDate(), headerFormat);
+        s.addCell(lable);
+
+        int rowNum = 2;
+        for (GatePassDto employeeAttendanceDto : gatePassDtos) {
+            s.addCell(new Label(0, 1, "#", cellFormat));
+            s.addCell(new Label(0, rowNum, "" + Integer.valueOf(rowNum - 1), cLeft));
+            s.addCell(new Label(1, 1, "Employee Code", cellFormat));
+            s.addCell(new Label(1, rowNum, "" + employeeAttendanceDto.getEmployeeCode(), cLeft));
+            s.addCell(new Label(2, 1, "Employee Name", cellFormat));
+            s.addCell(new Label(2, rowNum, "" + employeeAttendanceDto.getEmployeeName(), cLeft));
+            s.addCell(new Label(3, 1, "Date", cellFormat));
+            s.addCell(new Label(3, rowNum, "" + employeeAttendanceDto.getRequestedOn(), cLeft));
+            s.addCell(new Label(4, 1, "Status", cellFormat));
+            s.addCell(new Label(4, rowNum, "" + employeeAttendanceDto.getStatus(), cLeft));
+            s.addCell(new Label(5, 1, "From time", cellFormat));
+            s.addCell(new Label(5, rowNum, "" + employeeAttendanceDto.getFromTime(), cLeft));
+            s.addCell(new Label(5, 1, "To time", cellFormat));
+            s.addCell(new Label(5, rowNum, "" + employeeAttendanceDto.getToTime(), cLeft));
+            rowNum = rowNum + 1;
+        }
+        s.addCell(new Label(5, rowNum, "Total Count = " + Integer.valueOf(rowNum - 2), cellFormat));
+        return workbook;
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
+import java.util.List;
 
 @Setter
 @Getter
@@ -41,5 +42,7 @@ public class DateDto {
 	private String reportType;
 	private int year;
 	private int month;
+
+	private List<Long> employeeIds;
 
 }

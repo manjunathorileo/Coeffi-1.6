@@ -15,8 +15,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-public class SopStepsMaster
-{
+public class SopStepsMaster {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

@@ -48,5 +48,6 @@ public class MonthlyStatusDto {
     private long singleEntryLaunch;
     private long singleEntrySnaks;
     private long singleEntryDinner;
+    private long singleEntryMidnightSnack;
     private boolean weekOffPresent;
 }

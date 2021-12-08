@@ -17,4 +17,6 @@ public interface DesignationService {
     void delete(Long id);
 
     List<Designation> getDepartmentDetail(Department department);
+
+    Designation getByName(String role);
 }

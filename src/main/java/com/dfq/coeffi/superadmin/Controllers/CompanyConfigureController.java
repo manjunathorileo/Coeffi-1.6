@@ -785,7 +785,7 @@ public class  CompanyConfigureController extends BaseController {
         configure.setTrialDays(365);
         configure.setCommercialEmail(dialyReportDto.getCommercialEmail());
         companyConfigureService.saveCompany(configure);
-        DateUtil.sendEmai(dialyReportDto.getCommercialEmail(), "CO_EFFI", "Your licence updated");
+//        DateUtil.sendEmai(dialyReportDto.getCommercialEmail(), "CO_EFFI", "Your licence updated");
         return new ResponseEntity<>(configure, HttpStatus.OK);
     }
 
@@ -1198,6 +1198,23 @@ public class  CompanyConfigureController extends BaseController {
         companyConfigureService.saveCompany(configure);
         return new ResponseEntity<>(configure, HttpStatus.OK);
     }
+
+    @PostMapping("company-config/shop-floor-module-name/{id}/{name}")
+    public ResponseEntity<CompanyConfigure> moduleNameSf(@PathVariable("id") long id, @PathVariable("name") String name) {
+        CompanyConfigure configure = companyConfigureService.getCompanyById(id);
+        configure.setShopFloorModuleName(name);
+        companyConfigureService.saveCompany(configure);
+        return new ResponseEntity<>(configure, HttpStatus.OK);
+    }
+
+    @PostMapping("company-config/sam-food-estimate/{id}/{status}")
+    public ResponseEntity<CompanyConfigure> foodEstimate(@PathVariable("id") long id, @PathVariable("status") boolean status) {
+        CompanyConfigure configure = companyConfigureService.getCompanyById(id);
+        configure.setFoodEstimateModule(status);
+        companyConfigureService.saveCompany(configure);
+        return new ResponseEntity<>(configure, HttpStatus.OK);
+    }
+
 
 
 

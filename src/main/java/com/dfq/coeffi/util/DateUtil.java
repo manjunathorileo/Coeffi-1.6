@@ -26,10 +26,6 @@ public class DateUtil implements Serializable {
      *
      */
 
-    @Autowired
-    private static MailService mailService;
-    @Autowired
-    private ShiftRepository shiftRepository;
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static SimpleDateFormat dformat = new SimpleDateFormat("yyyyMMdd");
@@ -258,13 +254,6 @@ public class DateUtil implements Serializable {
         return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
     }
 
-    public static void sendEmai(String email, String title, String content) {
-        Date todayDate = new Date();
-        EmailConfig emailConfignew = new EmailConfig();
-        String emailTitle = title + " on " + todayDate;
-        Mail mailnew = emailConfignew.setMailCredentials(email, emailTitle, content, null);
-        mailService.sendEmail(mailnew, "****");
-    }
 
 
     public static long getDifferenceMinutes(Date d1, Date d2) {
@@ -325,26 +314,26 @@ public class DateUtil implements Serializable {
         return startDate;
     }
 
-    public ResponseEntity<Shift> getCurrentShift() {
-        int currentTime = DateUtil.getRunningHour();
-        System.out.println("CurrentTime " + currentTime);
-        List<Shift> shiftList = new ArrayList<>();
-        Shift shift = null;
-        List<Shift> shifts = null;
-        if (shifts == null) {
-            shifts = shiftRepository.findAll();
-        }
-        for (Shift runningShift : shifts) {
-            if (currentTime >= DateUtil.getRunningHour(runningShift.getStartTime()) && currentTime <= DateUtil.getRunningHour(runningShift.getEndTime())) {
-                shiftList.add(runningShift);
-            }
-        }
-        if (shiftList.isEmpty()) {
-            return null;
-        } else {
-            return new ResponseEntity<>(shiftList.get(0), HttpStatus.OK);
-        }
-    }
+//    public ResponseEntity<Shift> getCurrentShift() {
+//        int currentTime = DateUtil.getRunningHour();
+//        System.out.println("CurrentTime " + currentTime);
+//        List<Shift> shiftList = new ArrayList<>();
+//        Shift shift = null;
+//        List<Shift> shifts = null;
+//        if (shifts == null) {
+//            shifts = shiftRepository.findAll();
+//        }
+//        for (Shift runningShift : shifts) {
+//            if (currentTime >= DateUtil.getRunningHour(runningShift.getStartTime()) && currentTime <= DateUtil.getRunningHour(runningShift.getEndTime())) {
+//                shiftList.add(runningShift);
+//            }
+//        }
+//        if (shiftList.isEmpty()) {
+//            return null;
+//        } else {
+//            return new ResponseEntity<>(shiftList.get(0), HttpStatus.OK);
+//        }
+//    }
 
     public static long getCalenderDays(int year, int month) {
         YearMonth yearMonthObject = YearMonth.of(year, month);

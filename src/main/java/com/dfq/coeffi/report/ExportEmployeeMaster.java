@@ -125,10 +125,10 @@ public class ExportEmployeeMaster extends BaseController {
         List<Employee> employeeWorker = employeeService.getEmployeeByType(EmployeeType.PERMANENT_WORKER,true);
         employeeList.addAll(employeeStaff);
         employeeList.addAll(employeeWorker);
-        List<Employee> empPermanentContracts = getAllPermanentContract();
-        List<Employee> empVisitors = getvisitors();
-        employeeList.addAll(empPermanentContracts);
-        employeeList.addAll(empVisitors);
+//        List<Employee> empPermanentContracts = getAllPermanentContract();
+//        List<Employee> empVisitors = getvisitors();
+//        employeeList.addAll(empPermanentContracts);
+//        employeeList.addAll(empVisitors);
         return employeeList;
     }
 

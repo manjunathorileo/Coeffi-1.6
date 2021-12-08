@@ -16,9 +16,7 @@ import com.dfq.coeffi.employeePermanentContract.services.PermanentContractServic
 import com.dfq.coeffi.entity.holiday.Holiday;
 import com.dfq.coeffi.entity.hr.DepartmentTracker;
 import com.dfq.coeffi.entity.hr.DepartmentTrackerRepository;
-import com.dfq.coeffi.entity.hr.employee.AttendanceStatus;
-import com.dfq.coeffi.entity.hr.employee.Employee;
-import com.dfq.coeffi.entity.hr.employee.EmployeeType;
+import com.dfq.coeffi.entity.hr.employee.*;
 import com.dfq.coeffi.entity.leave.Leave;
 import com.dfq.coeffi.entity.leave.LeaveStatus;
 import com.dfq.coeffi.entity.leave.LeaveType;
@@ -41,6 +39,7 @@ import com.dfq.coeffi.vivo.repository.TypeOfVehicleRepository;
 import com.dfq.coeffi.vivo.repository.VivoInfoRepository;
 import com.dfq.coeffi.vivo.repository.VivoPassRepo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -185,29 +184,37 @@ public class ExcelUpload extends BaseController {
                     employeeAttendance.setMarkedOn(row.getCell(1).getDateCellValue());
                     employeeAttendance.setInTime(row.getCell(2).getDateCellValue());
                     employeeAttendance.setOutTime(row.getCell(3).getDateCellValue());
-                    employeeAttendance.setWorkedHours(String.valueOf(row.getCell(4).getNumericCellValue()));
-                    employeeAttendance.setLateEntry(String.valueOf(row.getCell(5).getNumericCellValue()));
-                    employeeAttendance.setOverTime(String.valueOf(row.getCell(6).getNumericCellValue()));
+//                    if (row.getCell(4) != null) {
+//                        employeeAttendance.setWorkedHours(String.valueOf(row.getCell(4).getNumericCellValue()));
+//                    }
+//                    if (row.getCell(5) != null) {
+//                        employeeAttendance.setLateEntry(String.valueOf(row.getCell(5).getNumericCellValue()));
+//                    }
+//                    if (row.getCell(6) != null) {
+//                        employeeAttendance.setOverTime(String.valueOf(row.getCell(6).getNumericCellValue()));
+//                    }
 
-                    long empCode = (long) row.getCell(7).getNumericCellValue();
+                    String empCode = row.getCell(4).getStringCellValue();
                     String employeeCode = String.valueOf(empCode);
                     Optional<Employee> employee = employeeService.getEmployeeByEmployeeCode(employeeCode);
                     System.out.println("empcode+" + employeeCode);
                     if (employee.isPresent()) {
                         employeeAttendance.setEmployee(employee.get());
-                    }
-                    Shift s = shiftService.getShift((long) row.getCell(8).getNumericCellValue());
-                    employeeAttendance.setShift(s);
-                    employeeAttendance.setInTime(s.getStartTime());
-                    employeeAttendance.setOutTime(s.getEndTime());
-                    employeeAttendance.setRecordedTime(new Date());
-                    EmployeeAttendance employeeAttendance1 = checkAttendance(employeeAttendance);
-                    if (employeeAttendance1 != null) {
-                        throw new Exception("Attendance Already Marked On This Date " + employeeAttendance.getMarkedOn() + " for " + employee.get().getEmployeeCode());
-                    } else
-                        employeeAttendanceService.createEmployeeAttendance(employeeAttendance, false);
+                        if (row.getCell(5) != null) {
+                            Shift s = shiftService.getShift((long) row.getCell(5).getNumericCellValue());
+                            employeeAttendance.setShift(s);
+                            employeeAttendance.setInTime(s.getStartTime());
+                            employeeAttendance.setOutTime(s.getEndTime());
+                            employeeAttendance.setRecordedTime(new Date());
+                        }
+                        EmployeeAttendance employeeAttendance1 = checkAttendance(employeeAttendance);
+                        if (employeeAttendance1 != null) {
+                            System.out.println("Attendance Already Marked On This Date " + employeeAttendance.getMarkedOn() + " for " + employee.get().getEmployeeCode());
+                        } else
+                            employeeAttendanceService.createEmployeeAttendance(employeeAttendance, false);
 
-                    dto.add(employeeAttendance);
+                        dto.add(employeeAttendance);
+                    }
 
                 }
             } else {
@@ -426,6 +433,9 @@ public class ExcelUpload extends BaseController {
                     Row row = sheet.getRow(i);
                     Employee employee = new Employee();
                     employee.setEmployeeCode(String.valueOf(row.getCell(0).getStringCellValue()));
+                    if (employee.getEmployeeCode()==null ||employee.getEmployeeCode().equals("")){
+                        return dto;
+                    }
                     Optional<Employee> employeeCheck = employeeService.getEmployeeByEmployeeCode(employee.getEmployeeCode());
                     if (!employeeCheck.isPresent()) {
                         employee.setFirstName(row.getCell(1).getStringCellValue());
@@ -441,9 +451,249 @@ public class ExcelUpload extends BaseController {
                             type = EmployeeType.PERMANENT_WORKER;
                         }
                         employee.setEmployeeType(type);
-                        employeeService.save(employee);
+                        if (row.getCell(7) != null) {
+                            employee.setLastName(row.getCell(7).getStringCellValue());
+                        }
+                        if (row.getCell(8) != null) {
+                            employee.setFatherName(row.getCell(8).getStringCellValue());
+                        }
+                        if (row.getCell(9) != null) {
+                            employee.setMotherName(row.getCell(9).getStringCellValue());
+                        }
+                        if (row.getCell(10) != null) {
+                            employee.setGender(row.getCell(10).getStringCellValue());
+                        }
+                        if (row.getCell(11) != null) {
+                            employee.setMaritalStatus(row.getCell(11).getStringCellValue());
+                        }
+                        if (row.getCell(12) != null) {
+                            employee.setDateOfMarriage(row.getCell(12).getDateCellValue());
+                        }
+                        if (row.getCell(13) != null) {
+                            employee.setDateOfBirth(row.getCell(13).getDateCellValue());
+                        }
+                        if (row.getCell(14) != null) {
+                            employee.setAge(row.getCell(14).getStringCellValue());
+                        }
+                        if (row.getCell(15) != null) {
+                            employee.setPhoneNumber(row.getCell(15).getStringCellValue());
+                        }
+                        if (row.getCell(16) != null) {
+                            employee.setEmergencyPhoneNumber(row.getCell(16).getStringCellValue());
+                        }
+                        if (row.getCell(17) != null) {
+                            employee.setBloodGroup(row.getCell(17).getStringCellValue());
+                        }
+                        if (row.getCell(18) != null) {
+                            employee.setReligion(row.getCell(18).getStringCellValue());
+                        }
+                        if (row.getCell(19) != null) {
+                            employee.setCaste(row.getCell(19).getStringCellValue());
+                        }
+                        if (row.getCell(20) != null) {
+                            employee.setFamilyDependents((int) row.getCell(20).getNumericCellValue());
+                        }
+                        if (row.getCell(21) != null) {
+                            employee.setPermanentAddress(row.getCell(21).getStringCellValue());
+                        }
+                        if (row.getCell(22) != null) {
+                            employee.setCurrentAddress(row.getCell(22).getStringCellValue());
+                        }
+                        if (row.getCell(23) != null) {
+                            employee.setLevel(row.getCell(23).getStringCellValue());
+                        }
+                        if (row.getCell(24) != null) {
+                            employee.setDateOfJoining(row.getCell(24).getDateCellValue());
+                        }
+                        if (row.getCell(25) != null) {
+                            employee.setProbationaryPeriod(row.getCell(25).getStringCellValue());
+                        }
+                        if (row.getCell(26) != null) {
+                            employee.setUanNumber(row.getCell(26).getStringCellValue());
+                        }
+                        if (row.getCell(27) != null) {
+                            employee.setPfNumber(row.getCell(27).getStringCellValue());
+                        }
+                        if (row.getCell(28) != null) {
+                            employee.setEsiNumber(row.getCell(28).getStringCellValue());
+                        }
+                        if (row.getCell(29) != null) {
+                            employee.setPanNumber(row.getCell(29).getStringCellValue());
+                        }
+                        if (row.getCell(30) != null) {
+                            FamilyMember familyMember = new FamilyMember();
+                            familyMember.setName(row.getCell(30).getStringCellValue());//fam mem name
+                            if (row.getCell(31) != null) {
+                                familyMember.setDateOfBirth(row.getCell(31).getDateCellValue());//fam mem dateofBirth
+                            }
+                            if (row.getCell(32) != null) {
+                                familyMember.setRelation(row.getCell(32).getStringCellValue());
+                            }
+
+                            employee.setFamilyMember(Arrays.asList(familyMember));
+                        }
+
+                        if (row.getCell(33) != null) {
+                            Qualification qualification = new Qualification();
+                            qualification.setCourse(row.getCell(33).getStringCellValue());//Graduation
+                            if (row.getCell(34) != null) {
+                                qualification.setCourseType(row.getCell(34).getStringCellValue());//Course type
+                            }
+                            if (row.getCell(35) != null) {
+                                qualification.setPlaceOfGraduation(row.getCell(35).getStringCellValue());
+                            }
+                            if (row.getCell(36) != null) {
+                                qualification.setBranch(row.getCell(36).getStringCellValue());
+                            }
+                            if (row.getCell(37) != null) {
+                                if (row.getCell(37).getCellType()!=Cell.CELL_TYPE_BLANK) {
+                                    qualification.setAggregate(Double.valueOf(row.getCell(37).getStringCellValue()));
+                                }
+                            }
+                            if (row.getCell(38) != null) {
+                                qualification.setYearOfCompletion(row.getCell(38).getDateCellValue());
+                            }
+                            employee.setQualification(Arrays.asList(qualification));
+                        }
+
+                        if (row.getCell(39) != null) {
+                            EmployeeCertification employeeCertification = new EmployeeCertification();
+                            employeeCertification.setCertificationName(row.getCell(39).getStringCellValue());
+                            if (row.getCell(40) != null) {
+                                employeeCertification.setInstituteName(row.getCell(40).getStringCellValue());
+                            }
+                            if (row.getCell(41) != null) {
+                                employeeCertification.setStartDate(row.getCell(41).getDateCellValue());
+                            }
+                            if (row.getCell(42) != null) {
+                                employeeCertification.setEndDate(row.getCell(42).getDateCellValue());
+                            }
+                            employee.setEmployeeCertifications(Arrays.asList(employeeCertification));
+                        }
+
+                        if (row.getCell(43) != null) {
+                            PreviousEmployement previousEmployement = new PreviousEmployement();
+                            previousEmployement.setEmployeeName(row.getCell(43).getStringCellValue());
+                            if (row.getCell(44) != null) {
+                                previousEmployement.setEmployementType(row.getCell(44).getStringCellValue());
+                            }
+                            if (row.getCell(45) != null) {
+                                previousEmployement.setPosition(row.getCell(45).getStringCellValue());
+                            }
+                            if (row.getCell(46) != null) {
+                                if (row.getCell(46).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setSalary(row.getCell(46).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(47) != null) {
+                                previousEmployement.setStartDate(row.getCell(47).getDateCellValue());
+                            }
+                            if (row.getCell(48) != null) {
+                                previousEmployement.setEndDate(row.getCell(48).getDateCellValue());
+                            }
+                            if (row.getCell(49) != null) {
+                                if (row.getCell(49).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInYear(row.getCell(49).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(50) != null) {
+                                if (row.getCell(50).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInMonth(row.getCell(50).getNumericCellValue());
+                                }
+                            }
+                            employee.setPreviousEmployement(Arrays.asList(previousEmployement));
+                        }
+
+                        employee = employeeService.save(employee);
                         //TODO uncomment other imports
                         allocateLeave(employee);
+                        if (row.getCell(30) != null) {
+                            FamilyMember familyMember = new FamilyMember();
+                            familyMember.setName(row.getCell(30).getStringCellValue());//fam mem name
+                            if (row.getCell(31) != null) {
+                                familyMember.setDateOfBirth(row.getCell(31).getDateCellValue());//fam mem dateofBirth
+                            }
+                            if (row.getCell(32) != null) {
+                                familyMember.setRelation(row.getCell(32).getStringCellValue());
+                            }
+                            familyMember.setEmployee(employee);
+                            employee.setFamilyMember(Arrays.asList(familyMember));
+                        }
+
+                        if (row.getCell(33) != null) {
+                            Qualification qualification = new Qualification();
+                            qualification.setCourse(row.getCell(33).getStringCellValue());//Graduation
+                            if (row.getCell(34) != null) {
+                                qualification.setCourseType(row.getCell(34).getStringCellValue());//Course type
+                            }
+                            if (row.getCell(35) != null) {
+                                qualification.setPlaceOfGraduation(row.getCell(35).getStringCellValue());
+                            }
+                            if (row.getCell(36) != null) {
+                                qualification.setBranch(row.getCell(36).getStringCellValue());
+                            }
+                            if (row.getCell(37) != null) {
+                                if (row.getCell(37).getCellType()!=Cell.CELL_TYPE_BLANK) {
+                                    qualification.setAggregate(Double.valueOf(row.getCell(37).getStringCellValue()));
+                                }
+                            }
+                            if (row.getCell(38) != null) {
+                                qualification.setYearOfCompletion(row.getCell(38).getDateCellValue());
+                            }
+                            qualification.setEmployee(employee);
+                            employee.setQualification(Arrays.asList(qualification));
+                        }
+
+                        if (row.getCell(39) != null) {
+                            EmployeeCertification employeeCertification = new EmployeeCertification();
+                            employeeCertification.setCertificationName(row.getCell(39).getStringCellValue());
+                            if (row.getCell(40) != null) {
+                                employeeCertification.setInstituteName(row.getCell(40).getStringCellValue());
+                            }
+                            if (row.getCell(41) != null) {
+                                employeeCertification.setStartDate(row.getCell(41).getDateCellValue());
+                            }
+                            if (row.getCell(42) != null) {
+                                employeeCertification.setEndDate(row.getCell(42).getDateCellValue());
+                            }
+                            employeeCertification.setEmployee(employee);
+                            employee.setEmployeeCertifications(Arrays.asList(employeeCertification));
+                        }
+
+                        if (row.getCell(43) != null) {
+                            PreviousEmployement previousEmployement = new PreviousEmployement();
+                            previousEmployement.setEmployeeName(row.getCell(43).getStringCellValue());
+                            if (row.getCell(44) != null) {
+                                previousEmployement.setEmployementType(row.getCell(44).getStringCellValue());
+                            }
+                            if (row.getCell(45) != null) {
+                                previousEmployement.setPosition(row.getCell(45).getStringCellValue());
+                            }
+                            if (row.getCell(46) != null) {
+                                if (row.getCell(46).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setSalary(row.getCell(46).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(47) != null) {
+                                previousEmployement.setStartDate(row.getCell(47).getDateCellValue());
+                            }
+                            if (row.getCell(48) != null) {
+                                previousEmployement.setEndDate(row.getCell(48).getDateCellValue());
+                            }
+                            if (row.getCell(49) != null) {
+                                if (row.getCell(49).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInYear(row.getCell(49).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(50) != null) {
+                                if (row.getCell(50).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInMonth(row.getCell(50).getNumericCellValue());
+                                }
+                            }
+                            previousEmployement.setEmployee(employee);
+                            employee.setPreviousEmployement(Arrays.asList(previousEmployement));
+                        }
+
                         dto.add(employee);
                     } else {
                         System.out.println("entry exits");
@@ -461,7 +711,162 @@ public class ExcelUpload extends BaseController {
                             type = EmployeeType.PERMANENT_WORKER;
                         }
                         employee.setEmployeeType(type);
-                        employeeService.save(employee);
+                        if (row.getCell(7) != null) {
+                            employee.setLastName(row.getCell(7).getStringCellValue());
+                        }
+                        if (row.getCell(8) != null) {
+                            employee.setFatherName(row.getCell(8).getStringCellValue());
+                        }
+                        if (row.getCell(9) != null) {
+                            employee.setMotherName(row.getCell(9).getStringCellValue());
+                        }
+                        if (row.getCell(10) != null) {
+                            employee.setGender(row.getCell(10).getStringCellValue());
+                        }
+                        if (row.getCell(11) != null) {
+                            employee.setMaritalStatus(row.getCell(11).getStringCellValue());
+                        }
+                        if (row.getCell(12) != null) {
+                            employee.setDateOfMarriage(row.getCell(12).getDateCellValue());
+                        }
+                        if (row.getCell(13) != null) {
+                            employee.setDateOfBirth(row.getCell(13).getDateCellValue());
+                        }
+                        if (row.getCell(14) != null) {
+                            employee.setAge(row.getCell(14).getStringCellValue());
+                        }
+                        if (row.getCell(15) != null) {
+                            employee.setPhoneNumber(row.getCell(15).getStringCellValue());
+                        }
+                        if (row.getCell(16) != null) {
+                            employee.setEmergencyPhoneNumber(row.getCell(16).getStringCellValue());
+                        }
+                        if (row.getCell(17) != null) {
+                            employee.setBloodGroup(row.getCell(17).getStringCellValue());
+                        }
+                        if (row.getCell(18) != null) {
+                            employee.setReligion(row.getCell(18).getStringCellValue());
+                        }
+                        if (row.getCell(19) != null) {
+                            employee.setCaste(row.getCell(19).getStringCellValue());
+                        }
+                        if (row.getCell(20) != null) {
+                            employee.setFamilyDependents((int) row.getCell(20).getNumericCellValue());
+                        }
+                        if (row.getCell(21) != null) {
+                            employee.setPermanentAddress(row.getCell(21).getStringCellValue());
+                        }
+                        if (row.getCell(22) != null) {
+                            employee.setCurrentAddress(row.getCell(22).getStringCellValue());
+                        }
+                        if (row.getCell(23) != null) {
+                            employee.setLevel(row.getCell(23).getStringCellValue());
+                        }
+                        if (row.getCell(24) != null) {
+                            employee.setDateOfJoining(row.getCell(24).getDateCellValue());
+                        }
+                        if (row.getCell(25) != null) {
+                            employee.setProbationaryPeriod(row.getCell(25).getStringCellValue());
+                        }
+                        if (row.getCell(26) != null) {
+                            employee.setUanNumber(row.getCell(26).getStringCellValue());
+                        }
+                        if (row.getCell(27) != null) {
+                            employee.setPfNumber(row.getCell(27).getStringCellValue());
+                        }
+                        if (row.getCell(28) != null) {
+                            employee.setEsiNumber(row.getCell(28).getStringCellValue());
+                        }
+                        if (row.getCell(29) != null) {
+                            employee.setPanNumber(row.getCell(29).getStringCellValue());
+                        }
+                        employee = employeeService.save(employee);
+                        if (row.getCell(30) != null) {
+                            FamilyMember familyMember = new FamilyMember();
+                            familyMember.setName(row.getCell(30).getStringCellValue());//fam mem name
+                            if (row.getCell(31) != null) {
+                                familyMember.setDateOfBirth(row.getCell(31).getDateCellValue());//fam mem dateofBirth
+                            }
+                            if (row.getCell(32) != null) {
+                                familyMember.setRelation(row.getCell(32).getStringCellValue());
+                            }
+                            familyMember.setEmployee(employee);
+                            employee.setFamilyMember(Arrays.asList(familyMember));
+                        }
+
+                        if (row.getCell(33) != null) {
+                            Qualification qualification = new Qualification();
+                            qualification.setCourse(row.getCell(33).getStringCellValue());//Graduation
+                            if (row.getCell(34) != null) {
+                                qualification.setCourseType(row.getCell(34).getStringCellValue());//Course type
+                            }
+                            if (row.getCell(35) != null) {
+                                qualification.setPlaceOfGraduation(row.getCell(35).getStringCellValue());
+                            }
+                            if (row.getCell(36) != null) {
+                                qualification.setBranch(row.getCell(36).getStringCellValue());
+                            }
+                            if (row.getCell(37) != null) {
+                                if (row.getCell(37).getCellType()!=Cell.CELL_TYPE_BLANK) {
+                                    qualification.setAggregate(Double.valueOf(row.getCell(37).getStringCellValue()));
+                                }
+                            }
+                            if (row.getCell(38) != null) {
+                                qualification.setYearOfCompletion(row.getCell(38).getDateCellValue());
+                            }
+                            qualification.setEmployee(employee);
+                            employee.setQualification(Arrays.asList(qualification));
+                        }
+
+                        if (row.getCell(39) != null) {
+                            EmployeeCertification employeeCertification = new EmployeeCertification();
+                            employeeCertification.setCertificationName(row.getCell(39).getStringCellValue());
+                            if (row.getCell(40) != null) {
+                                employeeCertification.setInstituteName(row.getCell(40).getStringCellValue());
+                            }
+                            if (row.getCell(41) != null) {
+                                employeeCertification.setStartDate(row.getCell(41).getDateCellValue());
+                            }
+                            if (row.getCell(42) != null) {
+                                employeeCertification.setEndDate(row.getCell(42).getDateCellValue());
+                            }
+                            employeeCertification.setEmployee(employee);
+                            employee.setEmployeeCertifications(Arrays.asList(employeeCertification));
+                        }
+
+                        if (row.getCell(43) != null) {
+                            PreviousEmployement previousEmployement = new PreviousEmployement();
+                            previousEmployement.setEmployeeName(row.getCell(43).getStringCellValue());
+                            if (row.getCell(44) != null) {
+                                previousEmployement.setEmployementType(row.getCell(44).getStringCellValue());
+                            }
+                            if (row.getCell(45) != null) {
+                                previousEmployement.setPosition(row.getCell(45).getStringCellValue());
+                            }
+                            if (row.getCell(46) != null) {
+                                if (row.getCell(46).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setSalary(row.getCell(46).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(47) != null) {
+                                previousEmployement.setStartDate(row.getCell(47).getDateCellValue());
+                            }
+                            if (row.getCell(48) != null) {
+                                previousEmployement.setEndDate(row.getCell(48).getDateCellValue());
+                            }
+                            if (row.getCell(49) != null) {
+                                if (row.getCell(49).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInYear(row.getCell(49).getNumericCellValue());
+                                }
+                            }
+                            if (row.getCell(50) != null) {
+                                if (row.getCell(50).getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    previousEmployement.setExperienceInMonth(row.getCell(50).getNumericCellValue());
+                                }
+                            }
+                            previousEmployement.setEmployee(employee);
+                            employee.setPreviousEmployement(Arrays.asList(previousEmployement));
+                        }
                         dto.add(employee);
                     }
                 }
@@ -584,6 +989,22 @@ public class ExcelUpload extends BaseController {
                                 employee.setEmployeeType(EmployeeType.CONTRACT);
                                 employee.setTemporaryContract(true);
                             }
+                            if (row.getCell(7) != null) {
+                                employee.setPhoneNumber(row.getCell(7).getStringCellValue());
+                            }
+                            if (row.getCell(8) != null) {
+                                employee.setEmail(row.getCell(8).getStringCellValue());
+                            }
+                            if (row.getCell(9) != null) {
+                                employee.setPermanentAddress(row.getCell(9).getStringCellValue());
+                            }
+//                            employee.setCo(row.getCell(10).getStringCellValue());
+                            if (row.getCell(11) != null) {
+                                employee.setRole(row.getCell(11).getStringCellValue());
+                            }
+                            if (row.getCell(12) != null) {
+                                employee.setDateOfJoining(row.getCell(12).getDateCellValue());
+                            }
                             permanentContractService.save(employee);
                             dto.add(employee);
                         } else {
@@ -613,6 +1034,22 @@ public class ExcelUpload extends BaseController {
                             } else if (employee.getEmployeeType().equals(EmployeeType.CONTRACT)) {
                                 employee.setEmployeeType(EmployeeType.CONTRACT);
                                 employee.setTemporaryContract(true);
+                            }
+                            if (row.getCell(7) != null) {
+                                employee.setPhoneNumber(row.getCell(7).getStringCellValue());
+                            }
+                            if (row.getCell(8) != null) {
+                                employee.setEmail(row.getCell(8).getStringCellValue());
+                            }
+                            if (row.getCell(9) != null) {
+                                employee.setPermanentAddress(row.getCell(9).getStringCellValue());
+                            }
+//                            employee.setCo(row.getCell(10).getStringCellValue());
+                            if (row.getCell(11) != null) {
+                                employee.setRole(row.getCell(11).getStringCellValue());
+                            }
+                            if (row.getCell(12) != null) {
+                                employee.setDateOfJoining(row.getCell(12).getDateCellValue());
                             }
                             permanentContractService.save(employee);
                             dto.add(employee);

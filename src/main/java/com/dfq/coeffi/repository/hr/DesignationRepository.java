@@ -18,4 +18,6 @@ public interface DesignationRepository extends JpaRepository<Designation, Long> 
     void deactivate(@Param("id") long id);
 
     List<Designation> findByStatus(boolean status);
+
+    Designation findByName(String role);
 }

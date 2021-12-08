@@ -147,7 +147,9 @@ public class FoodConsumeReport extends BaseController {
         s.addCell(new Label(13, 1, "Dinner Rate", cellFormat));
         s.addCell(new Label(14, 1, "Snacks Availed", cellFormat));
         s.addCell(new Label(15, 1, "Snacks Rate", cellFormat));
-        s.addCell(new Label(16, 1, "Total", cellFormat));
+        s.addCell(new Label(16, 1, "Midnight Snacks Availed", cellFormat));
+        s.addCell(new Label(17, 1, "Midnight Snacks Rate", cellFormat));
+        s.addCell(new Label(18, 1, "Total", cellFormat));
 
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -188,13 +190,15 @@ public class FoodConsumeReport extends BaseController {
             s.addCell(new Label(13, rownum, "" + foodTracker.getDinnerRate(), cLeft));
             s.addCell(new Label(14, rownum, "" + foodTracker.getSnacksAvailed(), cLeft));
             s.addCell(new Label(15, rownum, "" + foodTracker.getSnacksRate(), cLeft));
-            s.addCell(new Label(16, rownum, "" + foodTracker.getTotalToday(), cLeft));
+            s.addCell(new Label(16, rownum, "" + foodTracker.getMidnightSnackAvailed(), cLeft));
+            s.addCell(new Label(17, rownum, "" + foodTracker.getMidnightSnackRate(), cLeft));
+            s.addCell(new Label(18, rownum, "" + foodTracker.getTotalToday(), cLeft));
             rownum++;
         }
 
         rownum = rownum + 2;
-        s.addCell(new Label(16, rownum, "" + "GrandTotal", cellFormat));
-        s.addCell(new Label(16, rownum + 1, "" + grandTotal, cLeft));
+        s.addCell(new Label(19, rownum, "" + "GrandTotal", cellFormat));
+        s.addCell(new Label(19, rownum + 1, "" + grandTotal, cLeft));
 
         return workbook;
     }

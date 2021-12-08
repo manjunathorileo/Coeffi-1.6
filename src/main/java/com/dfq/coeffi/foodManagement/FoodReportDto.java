@@ -31,6 +31,8 @@ public class FoodReportDto {
     private long snacksRate;
     private long dinnerAvailed;
     private long dinnerRate;
+    private long midnightSnackAvailed;
+    private long midnightSnackRate;
     private long totalToday;
     private String foodType;
 

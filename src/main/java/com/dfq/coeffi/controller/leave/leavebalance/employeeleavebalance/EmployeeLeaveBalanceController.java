@@ -45,7 +45,7 @@ public class EmployeeLeaveBalanceController extends BaseController {
     EmployeeRepository employeeRepository;
 
     @Autowired
-    private EmployeeLeaveBalanceController(EmployeeLeaveBalanceService employeeLeaveBalanceService, AcademicYearService academicYearService, LeaveService leaveService, EarningLeaveRuleService earningLeaveRuleService,LeaveSchedular leaveSchedular) {
+    private EmployeeLeaveBalanceController(EmployeeLeaveBalanceService employeeLeaveBalanceService, AcademicYearService academicYearService, LeaveService leaveService, EarningLeaveRuleService earningLeaveRuleService, LeaveSchedular leaveSchedular) {
         this.employeeLeaveBalanceService = employeeLeaveBalanceService;
         this.academicYearService = academicYearService;
         this.leaveService = leaveService;
@@ -103,23 +103,25 @@ public class EmployeeLeaveBalanceController extends BaseController {
 //                currentMonthLeaveBalance.add(employeeLeaveBalance);
 //            }
 //        }
-        List<EmployeeLeaveBalance> finalEB=new ArrayList<>();
-        List<Employee> employeeList=employeeService.findAll();
-        for(Employee e:employeeList){
-            EmployeeLeaveBalance getEmployeeLeaveBalanceByFinancialYearIdAndEmp = employeeLeaveBalanceService.getEmployeeLeaveBalanceByEmployeeIdByFinancialYearId(e.getId(),academicYearObj.getId());
-          EmployeeLeaveBalance elb=new EmployeeLeaveBalance();
-          Optional<Employee> emp=employeeService.getEmployee(e.getId());
-          Employee empnew=new Employee();
-          empnew.setId(emp.get().getId());
-          empnew.setFirstName(emp.get().getFirstName());
-          empnew.setLastName(emp.get().getLastName());
-          empnew.setEmployeeCode(emp.get().getEmployeeCode());
-          elb.setId(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getId());
-          elb.setAvailLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getAvailLeave());
-          elb.setOpeningLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getOpeningLeave());
-          elb.setClosingLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getClosingLeave());
-          elb.setEmployee(empnew);
-          finalEB.add(elb);
+        List<EmployeeLeaveBalance> finalEB = new ArrayList<>();
+        List<Employee> employeeList = employeeService.findAll();
+        for (Employee e : employeeList) {
+            EmployeeLeaveBalance getEmployeeLeaveBalanceByFinancialYearIdAndEmp = employeeLeaveBalanceService.getEmployeeLeaveBalanceByEmployeeIdByFinancialYearId(e.getId(), academicYearObj.getId());
+            if (getEmployeeLeaveBalanceByFinancialYearIdAndEmp!=null) {
+                EmployeeLeaveBalance elb = new EmployeeLeaveBalance();
+                Optional<Employee> emp = employeeService.getEmployee(e.getId());
+                Employee empnew = new Employee();
+                empnew.setId(emp.get().getId());
+                empnew.setFirstName(emp.get().getFirstName());
+                empnew.setLastName(emp.get().getLastName());
+                empnew.setEmployeeCode(emp.get().getEmployeeCode());
+                elb.setId(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getId());
+                elb.setAvailLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getAvailLeave());
+                elb.setOpeningLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getOpeningLeave());
+                elb.setClosingLeave(getEmployeeLeaveBalanceByFinancialYearIdAndEmp.getClosingLeave());
+                elb.setEmployee(empnew);
+                finalEB.add(elb);
+            }
 
         }
         return new ResponseEntity(finalEB, HttpStatus.OK);
@@ -130,7 +132,7 @@ public class EmployeeLeaveBalanceController extends BaseController {
         Optional<AcademicYear> academicYear = academicYearService.getActiveAcademicYear();
         AcademicYear academicYearObj = academicYear.get();
         EmployeeLeaveBalance getCurrentYearEmployeeLeaveBalanceEmployeeWise = employeeLeaveBalanceService.getEmployeeLeaveBalanceByEmployeeIdByFinancialYearId(employeeId, academicYearObj.getId());
-        Employee employee=new Employee();
+        Employee employee = new Employee();
         employee.setId(getCurrentYearEmployeeLeaveBalanceEmployeeWise.getEmployee().getId());
         employee.setFirstName(getCurrentYearEmployeeLeaveBalanceEmployeeWise.getEmployee().getFirstName());
         employee.setLastName(getCurrentYearEmployeeLeaveBalanceEmployeeWise.getEmployee().getLastName());

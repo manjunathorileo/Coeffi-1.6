@@ -413,9 +413,14 @@ public class LeaveController extends BaseController {
         String year = String.valueOf(DateUtil.getCurrentYear());
         CompOffTracker compOffTracker = compOffTrackerRepository.findByEmployeeIdAndMonthAndYear(leave.getRefId(), month, year);
         long days = DateUtil.getDifferenceDays(leave.getLeaveStartDate(), leave.getLeaveEndDate());
+        if (days==0){
+            days = 1;
+        }
         if (compOffTracker != null) {
             long availdDays = compOffTracker.getCompOffAvailedDays();
             long genDays = compOffTracker.getCompOffGeneratedDays();
+            compOffTracker.setEmployeeId(leave.getRefId());
+            compOffTracker.setEmployeeName(leave.getFirstName());
             compOffTracker.setCompOffAvailedDays(availdDays + days);
             compOffTracker.setCompOffGeneratedDays(genDays);
             compOffTracker.setBalance((compOffTracker.getCompOffGeneratedDays()) - (compOffTracker.getCompOffAvailedDays()));

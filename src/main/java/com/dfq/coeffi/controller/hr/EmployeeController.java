@@ -1488,6 +1488,7 @@ public class EmployeeController extends BaseController {
 
         for (Employee employee : empPermanentContracts) {
             if (employee.getEmployeeType().equals(EmployeeType.PERMANENT) || employee.getEmployeeType().equals(EmployeeType.PERMANENT_WORKER)) {
+                System.out.println("emoployeeCode: ----------"+employee.getEmployeeCode());
                 EmpPermanentContract empPermanentContrac = permanentContractService.get(employee.getEmployeeCode());
                 if (empPermanentContrac == null) {
                     EmpPermanentContract empPermanentContract1 = new EmpPermanentContract();

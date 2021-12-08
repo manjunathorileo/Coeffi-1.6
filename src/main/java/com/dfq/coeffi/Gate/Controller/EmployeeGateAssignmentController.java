@@ -1,6 +1,8 @@
 package com.dfq.coeffi.Gate.Controller;
 
 import com.dfq.coeffi.Gate.Entity.*;
+import com.dfq.coeffi.Gate.GateAccessMssql;
+import com.dfq.coeffi.Gate.GateAccessService;
 import com.dfq.coeffi.Gate.Repository.EmployeeGateAssignmentRepository;
 import com.dfq.coeffi.Gate.Service.EmployeeGateAssignmentService;
 import com.dfq.coeffi.Gate.Service.GateService;
@@ -13,17 +15,16 @@ import com.dfq.coeffi.entity.user.User;
 import com.dfq.coeffi.repository.hr.EmployeeRepository;
 import com.dfq.coeffi.service.UserService;
 import com.dfq.coeffi.service.hr.EmployeeService;
-import com.dfq.coeffi.superadmin.Entity.CompanyConfigure;
 import com.dfq.coeffi.superadmin.Services.CompanyConfigureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class EmployeeGateAssignmentController extends BaseController {
@@ -41,15 +42,12 @@ public class EmployeeGateAssignmentController extends BaseController {
     UserService userService;
     @Autowired
     CompanyConfigureService companyConfigureService;
+    @Autowired
+    GateAccessService gateAccessService;
 
     @PostMapping("employee-gate-assignment")
     public ResponseEntity<List<EmployeeGateAssignment>> assignGate(@Valid @RequestBody EmployeeGateAssignmentDto employeeGateAssignmentDto) {
         List<EmployeeGateAssignment> employeeGateAssignmentList = new ArrayList<>();
-//        CompanyConfigure companyConfigure = companyConfigureService.getCompanyById(1);
-//        companyConfigure.setGateAssignEmployeeType(employeeGateAssignmentDto.getEmployeeType());
-//        companyConfigure.setInGateIds(employeeGateAssignmentDto.getInGateIds());
-//        companyConfigure.setOutGateIds(employeeGateAssignmentDto.getOutGateIds());
-//        companyConfigureService.saveCompany(companyConfigure);
 
         List<Employee> employeesByType = employeeService.getEmployeeByType(employeeGateAssignmentDto.getEmployeeType(), true);
         List<Gate> inGates = new ArrayList<>();
@@ -76,6 +74,44 @@ public class EmployeeGateAssignmentController extends BaseController {
                 employeeGateAssignment.setOutGates(outGates);
                 employeeGateAssignment.setInGateNumbersList(ingatesRef);
                 employeeGateAssignment.setOutGateNumbersList(outgatesRef);
+
+                for (Gate ingate : inGates){
+                    List<GateAccessMssql> gateAccessMssqlOld =
+                            gateAccessService.getByEmployeeAndController(employee.getEmployeeCode(),ingate.getGateNumber());
+                    if (gateAccessMssqlOld .isEmpty()) {
+                        GateAccessMssql gateAccessMssqlDoor1 = new GateAccessMssql();
+                        gateAccessMssqlDoor1.setEmpId(employee.getEmployeeCode());
+                        gateAccessMssqlDoor1.setControllerCode(ingate.getGateNumber());
+                        gateAccessMssqlDoor1.setDoorId("1");
+                        gateAccessService.createGateAccess(gateAccessMssqlDoor1);
+
+                        GateAccessMssql gateAccessMssqlDoor2 = new GateAccessMssql();
+                        gateAccessMssqlDoor2.setEmpId(employee.getEmployeeCode());
+                        gateAccessMssqlDoor2.setControllerCode(ingate.getGateNumber());
+                        gateAccessMssqlDoor2.setDoorId("2");
+                        gateAccessService.createGateAccess(gateAccessMssqlDoor2);
+                    }
+                }
+
+                for (Gate outGate : outGates){
+
+                    List<GateAccessMssql> gateAccessMssqlOld =
+                            gateAccessService.getByEmployeeAndController(employee.getEmployeeCode(),outGate.getGateNumber());
+                    if (gateAccessMssqlOld .isEmpty()) {
+                        GateAccessMssql gateAccessMssqlDoor1 = new GateAccessMssql();
+                        gateAccessMssqlDoor1.setEmpId(employee.getEmployeeCode());
+                        gateAccessMssqlDoor1.setControllerCode(outGate.getGateNumber());
+                        gateAccessMssqlDoor1.setDoorId("1");
+                        gateAccessService.createGateAccess(gateAccessMssqlDoor1);
+
+                        GateAccessMssql gateAccessMssqlDoor2 = new GateAccessMssql();
+                        gateAccessMssqlDoor2.setEmpId(employee.getEmployeeCode());
+                        gateAccessMssqlDoor2.setControllerCode(outGate.getGateNumber());
+                        gateAccessMssqlDoor2.setDoorId("2");
+                        gateAccessService.createGateAccess(gateAccessMssqlDoor2);
+
+                    }
+                }
                 employeeGateAssignmentService.saveEmployeeGate(employeeGateAssignment);
             }
             employeeGateAssignmentList.add(employeeGateAssignment);
@@ -185,6 +221,45 @@ public class EmployeeGateAssignmentController extends BaseController {
         employeeGateAssignment.setOutGates(outGates);
         employeeGateAssignment.setInGateNumbersList(ingatesRef);
         employeeGateAssignment.setOutGateNumbersList(outgatesRef);
+
+        for (Gate ingate : inGates){
+            List<GateAccessMssql> gateAccessMssqlOld =
+                    gateAccessService.getByEmployeeAndController(employeeGateAssignment.getEmployee().getEmployeeCode(),ingate.getGateNumber());
+            if (gateAccessMssqlOld .isEmpty()) {
+                GateAccessMssql gateAccessMssqlDoor1 = new GateAccessMssql();
+                gateAccessMssqlDoor1.setEmpId(employeeGateAssignment.getEmployee().getEmployeeCode());
+                gateAccessMssqlDoor1.setControllerCode(ingate.getGateNumber());
+                gateAccessMssqlDoor1.setDoorId("1");
+                gateAccessService.createGateAccess(gateAccessMssqlDoor1);
+
+                GateAccessMssql gateAccessMssqlDoor2 = new GateAccessMssql();
+                gateAccessMssqlDoor2.setEmpId(employeeGateAssignment.getEmployee().getEmployeeCode());
+                gateAccessMssqlDoor2.setControllerCode(ingate.getGateNumber());
+                gateAccessMssqlDoor2.setDoorId("2");
+                gateAccessService.createGateAccess(gateAccessMssqlDoor2);
+            }
+        }
+
+        for (Gate outGate : outGates){
+
+            List<GateAccessMssql> gateAccessMssqlOld =
+                    gateAccessService.getByEmployeeAndController(employeeGateAssignment.getEmployee().getEmployeeCode(),outGate.getGateNumber());
+            if (gateAccessMssqlOld .isEmpty()) {
+                GateAccessMssql gateAccessMssqlDoor1 = new GateAccessMssql();
+                gateAccessMssqlDoor1.setEmpId(employeeGateAssignment.getEmployee().getEmployeeCode());
+                gateAccessMssqlDoor1.setControllerCode(outGate.getGateNumber());
+                gateAccessMssqlDoor1.setDoorId("1");
+                gateAccessService.createGateAccess(gateAccessMssqlDoor1);
+
+                GateAccessMssql gateAccessMssqlDoor2 = new GateAccessMssql();
+                gateAccessMssqlDoor2.setEmpId(employeeGateAssignment.getEmployee().getEmployeeCode());
+                gateAccessMssqlDoor2.setControllerCode(outGate.getGateNumber());
+                gateAccessMssqlDoor2.setDoorId("2");
+                gateAccessService.createGateAccess(gateAccessMssqlDoor2);
+
+            }
+        }
+
         employeeGateAssignmentService.saveEmployeeGate(employeeGateAssignment);
         return new ResponseEntity<>(employeeGateAssignment, HttpStatus.OK);
     }
@@ -229,8 +304,13 @@ public class EmployeeGateAssignmentController extends BaseController {
     public ResponseEntity<User> getAllUsers() {
         List<User> users = userService.getUsers();
         List<User> userList = new ArrayList<>();
+
         for (User user : users) {
             if (user.isActive()) {
+                Optional<Employee> employee = employeeService.getEmployeeByLogin(user.getId());
+                if (employee.isPresent()) {
+                    user.setEmpId(employee.get().getId());
+                }
                 userList.add(user);
             }
         }
